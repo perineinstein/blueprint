@@ -64,14 +64,14 @@ export default function ExamsPage() {
   }, [courseId]);
 
   // ── Question management ───────────────────────────────────
-  function addQuestion(type: "mcq" | "subjective") {
+  function addQuestion(type: "mcq_single" | "subjective") {
     const newQuestion: Question = {
       id: uuidv4(),
       type,
       text: "",
       marks: 1,
       order: questions.length,
-      ...(type === "mcq" && {
+      ...(type === "mcq_single" && {
         options: { A: "", B: "", C: "", D: "" },
         correctAnswer: "A",
       }),
@@ -124,7 +124,7 @@ export default function ExamsPage() {
         setError("All questions must have text.");
         return;
       }
-      if (q.type === "mcq") {
+      if (q.type === "mcq_single") {
         if (
           !q.options?.A ||
           !q.options?.B ||
@@ -450,7 +450,7 @@ export default function ExamsPage() {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => addQuestion("mcq")}
+                  onClick={() => addQuestion("mcq_single")}
                   className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs
                              font-medium rounded-lg hover:bg-blue-100 transition-colors"
                 >
@@ -485,12 +485,12 @@ export default function ExamsPage() {
                         Question {index + 1} —{" "}
                         <span
                           className={
-                            q.type === "mcq"
+                            q.type === "mcq_single" || q.type === "mcq_multi"
                               ? "text-blue-600"
                               : "text-purple-600"
                           }
                         >
-                          {q.type === "mcq" ? "Multiple Choice" : "Subjective"}
+                          {q.type === "mcq_single" || q.type === "mcq_multi" ? "Multiple Choice" : "Subjective"}
                         </span>
                       </span>
                       <div className="flex items-center gap-3">
@@ -577,7 +577,7 @@ export default function ExamsPage() {
                     </div>
 
                     {/* MCQ options */}
-                    {q.type === "mcq" && (
+                    {q.type === "mcq_single" || q.type === "mcq_multi" ? (
                       <div className="space-y-2">
                         {(["A", "B", "C", "D"] as const).map((opt) => (
                           <div
@@ -619,7 +619,7 @@ export default function ExamsPage() {
                           {q.correctAnswer} is correct)
                         </p>
                       </div>
-                    )}
+                    ) : null}
 
                     {/* Explanation field — NEW, add after options/subjective block */}
                     <div className="mt-3 pt-3 border-t border-gray-100">
