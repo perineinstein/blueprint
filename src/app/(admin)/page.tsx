@@ -303,7 +303,7 @@ export default function LandingPage() {
               {
                 icon: "📝",
                 title: "Smart Exams",
-                desc: "if (q.type === "if (q.type === "mcq_single") {_single") { auto-grading with timed exams. Subjective questions reviewed by instructors.",
+                desc: "MCQ auto-grading with timed exams. Subjective questions reviewed by instructors.",
                 color: "from-teal-500/20 to-teal-600/5",
                 border: "border-teal-500/20",
               },
