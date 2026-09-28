@@ -2,18 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { verifyAuthToken } from "@/lib/firebase/verifyAuth";
 
-// This route serves quiz questions WITHOUT correct answers
 export async function GET(
   request: NextRequest,
-  { params }: { params: { quizId: string } }
+  { params }: { params: Promise<{ quizId: string }> }
 ) {
   const user = await verifyAuthToken(request);
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Find the quiz (search across all topics)
-  // In production you'd pass courseId/moduleId/topicId as params
+  const { quizId } = await params;
+
   const { searchParams } = new URL(request.url);
   const courseId = searchParams.get("courseId");
   const moduleId = searchParams.get("moduleId");
@@ -46,7 +45,7 @@ export async function GET(
     .collection("topics")
     .doc(topicId)
     .collection("quizzes")
-    .doc(params.quizId)
+    .doc(quizId)
     .get();
 
   if (!quizDoc.exists) {
