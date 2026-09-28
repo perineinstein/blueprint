@@ -83,19 +83,15 @@ export type QuestionType = "mcq_single" | "mcq_multi" | "subjective";
 
 export interface Question {
   id: string;
-  type: QuestionType;
+  type: QuestionType;  // uses the shared QuestionType
   text: string;
-  imageUrl?: string;
-  options?: {
-    A: string;
-    B: string;
-    C: string;
-    D: string;
-  };
-  correctAnswer?: string;   // "A" | "B" | "C" | "D" — stripped before sending to client
-  explanation?: string; 
   marks: number;
   order: number;
+  options?: { A: string; B: string; C: string; D: string };
+  correctAnswer?: string;    // legacy single answer
+  correctAnswers?: string[]; // new multi-answer
+  explanation?: string;
+  imageUrl?: string;
 }
 
 export interface Exam {

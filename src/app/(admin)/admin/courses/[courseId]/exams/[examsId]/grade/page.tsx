@@ -224,7 +224,7 @@ export default function GradePage() {
                       </div>
 
                       <div className="ml-6">
-                        {question.type === "mcq_single" || question.type === "mcq_multi" ? (
+                        {question.type === "mcq_single" ? (
                           <div className="flex items-center gap-3">
                             <span className="text-xs text-gray-500">
                               Answer:{" "}
