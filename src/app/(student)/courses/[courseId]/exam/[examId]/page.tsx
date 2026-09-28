@@ -228,7 +228,7 @@ export default function ExamPage() {
 
       let score = 0;
       for (const question of originalExam.questions) {
-        if (question.type === "mcq" && question.correctAnswer) {
+        if (question.type === "mcq_single" && question.correctAnswer) {
           if (answers[question.id] === question.correctAnswer) {
             score += question.marks;
           }
@@ -241,7 +241,7 @@ export default function ExamPage() {
       );
 
       const totalMcqMarks = originalExam.questions
-        .filter((q) => q.type === "mcq")
+        .filter((q) => q.type === "mcq_single")
         .reduce((sum, q) => sum + q.marks, 0);
 
       const percentScore = hasSubjective
@@ -373,7 +373,7 @@ export default function ExamPage() {
             {examWithAnswers.questions.map((question, index) => {
               const studentAnswer = answers[question.id];
               const isCorrect =
-                question.type === "mcq"
+                question.type === "mcq_single"
                   ? studentAnswer === question.correctAnswer
                   : null; // subjective — no auto check
 
@@ -411,7 +411,7 @@ export default function ExamPage() {
                   )}
 
                   {/* MCQ answer review */}
-                  {question.type === "mcq" && question.options && (
+                  {question.type === "mcq_single" && question.options && (
                     <div className="ml-10 space-y-2 mb-3">
                       {(["A", "B", "C", "D"] as const).map((opt) => {
                         const isStudentAnswer = studentAnswer === opt;
@@ -597,7 +597,7 @@ export default function ExamPage() {
                       />
                     )}
 
-                    {question.type === "mcq" && question.options && (
+                    {question.type === "mcq_single" && question.options && (
                       <div className="space-y-2 ml-10 mt-3">
                         {(["A", "B", "C", "D"] as const).map((opt) => (
                           <button
