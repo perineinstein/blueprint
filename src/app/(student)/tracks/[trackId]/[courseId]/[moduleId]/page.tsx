@@ -40,6 +40,7 @@ import {
   Circle,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type Tab = "overview" | "topics" | "assessment" | "mastery";
 
