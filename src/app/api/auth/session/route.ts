@@ -45,9 +45,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Session error:", error);
+    const code = (error as { code?: unknown })?.code;
+    if (typeof code === "string" && code.startsWith("auth/")) {
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    }
     return NextResponse.json(
-      { error: "Invalid token" },
-      { status: 401 }
+      { error: "Session creation failed" },
+      { status: 500 }
     );
   }
 }

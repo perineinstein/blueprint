@@ -117,7 +117,6 @@ export default function AuthPage() {
       }
 
       // Set session cookie
-      // Set session cookie
       const idToken = await user.getIdToken();
       const sessionRes = await fetch("/api/auth/session", {
         method: "POST",
@@ -128,7 +127,7 @@ export default function AuthPage() {
       if (!sessionRes.ok) {
         const errData = await sessionRes.json().catch(() => ({}));
         console.error("Session error:", sessionRes.status, errData);
-        setLoginError("Sign-in failed. Please try again.");
+        setLoginError("Authentication failed. Please try again.");
         return;
       }
 
@@ -566,6 +565,11 @@ function firebaseError(code: string): string {
     "auth/network-request-failed": "Network error. Check your connection.",
     "auth/popup-closed-by-user": "Google sign-in was cancelled.",
     "auth/cancelled-popup-request": "Only one popup allowed at a time.",
+    "auth/unauthorized-domain":
+      "This domain is not authorized for sign-in. Contact support.",
+    "auth/internal-error": "An internal error occurred. Please try again.",
+    "auth/popup-blocked":
+      "Popup was blocked. Please allow popups for this site.",
   };
   return errors[code] ?? "Something went wrong. Please try again.";
 }

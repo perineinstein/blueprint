@@ -44,6 +44,11 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          // Allow Firebase/Google popup auth to keep window.opener
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
+          },
           // HSTS — force HTTPS
           {
             key: "Strict-Transport-Security",
@@ -58,7 +63,8 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https://firebasestorage.googleapis.com https://lh3.googleusercontent.com",
-              "frame-src 'self' https://blueprint-lms.firebaseapp.com https://player.vimeo.com https://www.youtube.com",              "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://api.paystack.co wss://*.firebaseio.com",
+              "frame-src 'self' https://blueprint-lms.firebaseapp.com https://accounts.google.com https://player.vimeo.com https://www.youtube.com",
+              "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://accounts.google.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://api.paystack.co wss://*.firebaseio.com",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
