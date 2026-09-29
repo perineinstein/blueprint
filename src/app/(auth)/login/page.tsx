@@ -117,12 +117,20 @@ export default function AuthPage() {
       }
 
       // Set session cookie
+      // Set session cookie
       const idToken = await user.getIdToken();
-      await fetch("/api/auth/session", {
+      const sessionRes = await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
+
+      if (!sessionRes.ok) {
+        const errData = await sessionRes.json().catch(() => ({}));
+        console.error("Session error:", sessionRes.status, errData);
+        setLoginError("Sign-in failed. Please try again.");
+        return;
+      }
 
       router.push("/dashboard");
     } catch (err: any) {
