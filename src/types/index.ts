@@ -347,5 +347,3 @@ export interface CredentialingResource {
   order: number;
   createdAt: Timestamp;
 }
-
-export const CREDENTIALING_PRICE = 50000; // GHS 500 in pesewas

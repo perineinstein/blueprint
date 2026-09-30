@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { verifyAuthToken } from "@/lib/firebase/verifyAuth";
-import { CREDENTIALING_PHASES, CREDENTIALING_PRICE } from "@/types";
 import { rateLimit } from "@/lib/rateLimit";
+
+const DEFAULT_CREDENTIALING_PRICE = 50000; // GHS 500 in pesewas
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,6 +49,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const settingsSnap = await adminDb
+      .collection("settings")
+      .doc("credentialing")
+      .get();
+    const storedPrice = settingsSnap.data()?.price;
+    const price =
+      typeof storedPrice === "number" && storedPrice > 0
+        ? storedPrice
+        : DEFAULT_CREDENTIALING_PRICE;
+
     const reference = `CRED-${Date.now()}-${Math.random()
       .toString(36)
       .substring(2, 8)
@@ -56,7 +67,7 @@ export async function POST(request: NextRequest) {
     await adminDb.collection("payments").doc(reference).set({
       userId,
       courseId: "credentialing",
-      amount: CREDENTIALING_PRICE,
+      amount: price,
       currency: "GHS",
       status: "pending",
       paystackRef: reference,
@@ -74,7 +85,7 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           email: userEmail,
-          amount: CREDENTIALING_PRICE,
+          amount: price,
           currency: "GHS",
           reference,
           callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/credentialing?payment=success`,

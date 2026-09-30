@@ -126,20 +126,20 @@ export default function CredentialingResourcesPage() {
         createdAt: serverTimestamp(),
       });
 
-      setSuccess("Resource added successfully.");
+      setSuccess("Cookie added successfully.");
       setShowForm(false);
       resetForm();
       fetchResources();
     } catch (err) {
       console.error(err);
-      setError("Failed to save resource.");
+      setError("Failed to save cookie.");
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete(resourceId: string) {
-    if (!confirm("Delete this resource?")) return;
+    if (!confirm("Delete this cookie?")) return;
     await deleteDoc(doc(db, "credentialingResources", resourceId));
     fetchResources();
   }
@@ -156,12 +156,12 @@ export default function CredentialingResourcesPage() {
             Credentialing
           </Link>
           <span>/</span>
-          <span className="text-gray-600">Resources</span>
+          <span className="text-gray-600">Cookies</span>
         </div>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">
-              Resources
+              Cookies
             </h1>
             <p className="text-sm text-gray-500 mt-1">
               Documents, links, and notes for enrolled students
@@ -174,7 +174,7 @@ export default function CredentialingResourcesPage() {
                        rounded-xl transition-colors"
           >
             <Plus size={16} />
-            Add resource
+            Add cookie
           </button>
         </div>
       </div>
@@ -190,7 +190,7 @@ export default function CredentialingResourcesPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-gray-900">
-              New resource
+              New cookie
             </h2>
             <button
               onClick={() => setShowForm(false)}
@@ -314,7 +314,7 @@ export default function CredentialingResourcesPage() {
                            text-sm font-medium rounded-xl transition-colors"
               >
                 <Check size={15} />
-                {saving ? "Saving..." : "Save resource"}
+                {saving ? "Saving..." : "Save cookie"}
               </button>
               <button
                 type="button"
@@ -336,7 +336,7 @@ export default function CredentialingResourcesPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-12
                         text-center">
           <FileText size={32} className="text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-400 text-sm">No resources yet.</p>
+          <p className="text-gray-400 text-sm">No cookies yet.</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">

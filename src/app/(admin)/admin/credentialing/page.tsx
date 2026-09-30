@@ -6,6 +6,7 @@ import {
   getDocs,
   doc,
   getDoc,
+  setDoc,
   updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
@@ -30,8 +31,10 @@ import {
   Users,
   ChevronRight,
   Search,
+  Banknote,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { formatPrice } from "@/lib/utils/formatting";
 import Link from "next/link";
 
 interface EnrollmentWithUser extends CredentialingEnrollment {
@@ -85,6 +88,53 @@ export default function AdminCredentialingPage() {
   const [search, setSearch] = useState("");
   const [bulkPhase, setBulkPhase] = useState<number>(0);
   const [bulkSaving, setBulkSaving] = useState(false);
+  const [priceInput, setPriceInput] = useState("");
+  const [savedPrice, setSavedPrice] = useState<number | null>(null);
+  const [priceSaving, setPriceSaving] = useState(false);
+  const [priceMessage, setPriceMessage] = useState<
+    { type: "success" | "error"; text: string } | null
+  >(null);
+
+  async function fetchPrice() {
+    try {
+      const snap = await getDoc(doc(db, "settings", "credentialing"));
+      const stored = snap.data()?.price;
+      const pesewas =
+        typeof stored === "number" && stored > 0 ? stored : 50000;
+      setSavedPrice(pesewas);
+      setPriceInput((pesewas / 100).toString());
+    } catch (err) {
+      console.error(err);
+      setPriceMessage({ type: "error", text: "Failed to load current price." });
+    }
+  }
+
+  async function handleSavePrice(e: React.FormEvent) {
+    e.preventDefault();
+    setPriceMessage(null);
+    const ghs = parseFloat(priceInput);
+    if (!Number.isFinite(ghs) || ghs <= 0) {
+      setPriceMessage({ type: "error", text: "Enter a price greater than 0." });
+      return;
+    }
+    const pesewas = Math.round(ghs * 100);
+    setPriceSaving(true);
+    try {
+      await setDoc(
+        doc(db, "settings", "credentialing"),
+        { price: pesewas },
+        { merge: true }
+      );
+      setSavedPrice(pesewas);
+      setPriceInput((pesewas / 100).toString());
+      setPriceMessage({ type: "success", text: "Price updated." });
+    } catch (err) {
+      console.error(err);
+      setPriceMessage({ type: "error", text: "Failed to update price." });
+    } finally {
+      setPriceSaving(false);
+    }
+  }
 
   async function fetchData() {
     try {
@@ -124,6 +174,7 @@ export default function AdminCredentialingPage() {
 
   useEffect(() => {
     fetchData();
+    fetchPrice();
   }, []);
 
   function openEnrollment(enrollment: EnrollmentWithUser) {
@@ -279,8 +330,68 @@ export default function AdminCredentialingPage() {
                      transition-colors"
         >
           <ShieldCheck size={14} />
-          Resources
+          Cookies
         </Link>
+      </div>
+
+      {/* Price management */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Banknote size={16} className="text-blue-600" />
+          <h2 className="text-sm font-semibold text-gray-900">
+            Credentialing Price
+          </h2>
+        </div>
+        <p className="text-xs text-gray-500 mb-4">
+          Current price:{" "}
+          <span className="font-semibold text-gray-900">
+            {savedPrice === null ? "Loading..." : formatPrice(savedPrice)}
+          </span>
+          . Applies to new enrollments.
+        </p>
+        {priceMessage && (
+          <div
+            className={cn(
+              "mb-3 p-3 rounded-xl text-sm",
+              priceMessage.type === "success"
+                ? "bg-green-50 text-green-600"
+                : "bg-red-50 text-red-600"
+            )}
+          >
+            {priceMessage.text}
+          </div>
+        )}
+        <form
+          onSubmit={handleSavePrice}
+          className="flex items-center gap-3 flex-wrap"
+        >
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm
+                             text-gray-400">
+              GHS
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={priceInput}
+              onChange={(e) => setPriceInput(e.target.value)}
+              className="w-40 pl-12 pr-3 py-2 border border-gray-200 rounded-xl
+                         text-sm text-gray-900 bg-white focus:outline-none
+                         focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={priceSaving || savedPrice === null}
+            className="flex items-center gap-2 px-5 py-2 bg-blue-600
+                       hover:bg-blue-700 disabled:bg-blue-400 text-white
+                       text-sm font-medium rounded-xl transition-colors"
+          >
+            <Save size={14} />
+            {priceSaving ? "Saving..." : "Save price"}
+          </button>
+        </form>
       </div>
 
       {/* Stats */}

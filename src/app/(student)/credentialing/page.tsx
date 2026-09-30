@@ -15,7 +15,6 @@ import {
   CredentialingEnrollment,
   CredentialingResource,
   CREDENTIALING_PHASES,
-  CREDENTIALING_PRICE,
 } from "@/types";
 import { formatPrice } from "@/lib/utils/formatting";
 import { useSearchParams } from "next/navigation";
@@ -37,6 +36,8 @@ import { cn } from "@/lib/utils/cn";
 
 type Tab = "journey" | "resources";
 
+const DEFAULT_CREDENTIALING_PRICE = 50000; // GHS 500 in pesewas
+
 export default function CredentialingPage() {
   const { appUser } = useAuth();
   const searchParams = useSearchParams();
@@ -46,6 +47,7 @@ export default function CredentialingPage() {
     useState<CredentialingEnrollment | null>(null);
   const [resources, setResources] = useState<CredentialingResource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [price, setPrice] = useState(DEFAULT_CREDENTIALING_PRICE);
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -55,7 +57,7 @@ export default function CredentialingPage() {
   const fetchData = useCallback(async () => {
     if (!appUser) return;
     try {
-      const [enrollSnap, resourcesSnap] = await Promise.all([
+      const [enrollSnap, resourcesSnap, settingsSnap] = await Promise.all([
         getDoc(doc(db, "credentialingEnrollments", appUser.id)),
         getDocs(
           query(
@@ -63,7 +65,15 @@ export default function CredentialingPage() {
             orderBy("order", "asc")
           )
         ),
+        getDoc(doc(db, "settings", "credentialing")),
       ]);
+
+      const storedPrice = settingsSnap.data()?.price;
+      setPrice(
+        typeof storedPrice === "number" && storedPrice > 0
+          ? storedPrice
+          : DEFAULT_CREDENTIALING_PRICE
+      );
 
       if (enrollSnap.exists()) {
         setEnrollment({
@@ -244,7 +254,7 @@ export default function CredentialingPage() {
                         items-center justify-between">
           <div>
             <p className="text-lg font-bold text-gray-900">
-              {formatPrice(CREDENTIALING_PRICE)}
+              {formatPrice(price)}
             </p>
             <p className="text-xs text-gray-400">One-time · 1 year access</p>
           </div>
@@ -409,7 +419,7 @@ export default function CredentialingPage() {
         {(
           [
             { id: "journey", label: "My Journey" },
-            { id: "resources", label: "Resources" },
+            { id: "resources", label: "Cookies" },
           ] as { id: Tab; label: string }[]
         ).map((tab) => (
           <button
@@ -614,7 +624,7 @@ export default function CredentialingPage() {
                             text-center">
               <BookOpen size={32} className="text-gray-300 mx-auto mb-3" />
               <p className="text-sm text-gray-400">
-                No resources added yet.
+                No cookies added yet.
                 <br />
                 Check back soon.
               </p>
