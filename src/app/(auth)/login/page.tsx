@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/hooks/useAuth";
 import {
   sendPasswordResetEmail,
@@ -454,6 +455,26 @@ export default function AuthPage() {
             >
               {regLoading ? "Creating account..." : "Create account"}
             </button>
+
+            <p className="text-xs text-gray-400 text-center leading-relaxed">
+              By creating an account, you agree to our{" "}
+              <Link
+                href="/terms"
+                target="_blank"
+                className="text-blue-600 underline hover:text-blue-700"
+              >
+                Terms and Conditions
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/privacy"
+                target="_blank"
+                className="text-blue-600 underline hover:text-blue-700"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
           </form>
 
           {/* Divider */}

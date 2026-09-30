@@ -1157,18 +1157,28 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold text-sm mb-4">Support</h4>
               <div className="space-y-2">
-                {["Help Center", "Privacy Policy", "Terms of Service"].map(
-                  (item) => (
-                    <a
-                      key={item}
-                      href="#"
-                      className="block text-sm text-gray-400 hover:text-white
-                                 transition-colors"
-                    >
-                      {item}
-                    </a>
-                  )
-                )}
+                <a
+                  href="#"
+                  className="block text-sm text-gray-400 hover:text-white
+                             transition-colors"
+                >
+                  Help Center
+                </a>
+                <h4 className="font-semibold text-sm pt-4 pb-2">Legal</h4>
+                {[
+                  { label: "Privacy Policy", href: "/privacy" },
+                  { label: "Terms and Conditions", href: "/terms" },
+                  { label: "Cookie Policy", href: "/cookies" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block text-sm text-gray-400 hover:text-white
+                               transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </div>
             </div>
             <div className="col-span-2 md:col-span-1">
@@ -1202,15 +1212,19 @@ export default function LandingPage() {
               Made by <span className="font-bold text-gray-400">SteinKernel Systems</span>
             </p>
             <div className="flex items-center gap-4">
-              {["Privacy", "Terms", "Cookies"].map((item) => (
-                <a
-                  key={item}
-                  href="#"
+              {[
+                { label: "Privacy", href: "/privacy" },
+                { label: "Terms", href: "/terms" },
+                { label: "Cookies", href: "/cookies" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
                   className="text-xs text-gray-500 hover:text-gray-300
                              transition-colors"
                 >
-                  {item}
-                </a>
+                  {item.label}
+                </Link>
               ))}
             </div>
           </div>
