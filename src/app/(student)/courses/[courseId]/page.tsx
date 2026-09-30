@@ -16,6 +16,7 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { Course, Material, Enrollment } from "@/types";
 import { formatPrice } from "@/lib/utils/formatting";
 import Link from "next/link";
+import { getCourseLearnLink } from "@/lib/utils/courseLink";
 import CourseThumbnail from "@/components/student/CourseThumbnail";
 
 export default function CourseDetailPage() {
@@ -168,7 +169,7 @@ export default function CourseDetailPage() {
         {/* CTA */}
         {isEnrolled ? (
           <Link
-            href={`/courses/${courseId}/learn`}
+            href={getCourseLearnLink(courseId, course.trackId)}
             className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700
                        text-white text-sm font-medium rounded-lg transition-colors"
           >

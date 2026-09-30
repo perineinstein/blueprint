@@ -15,6 +15,7 @@ import {
 import { db } from "@/lib/firebase/client";
 import { Enrollment, Course, Announcement, TRACKS, TrackId } from "@/types";
 import Link from "next/link";
+import { getCourseLearnLink } from "@/lib/utils/courseLink";
 import ActivityCalendar from "@/components/student/ActivityCalendar";
 import CourseThumbnail from "@/components/student/CourseThumbnail";
 import { getCourseColor } from "@/lib/utils/courseColors";
@@ -317,7 +318,7 @@ export default function StudentDashboardPage() {
                               </div>
                             </div>
                             <Link
-                              href={`/tracks/${trackId}/${course.id}`}
+                              href={getCourseLearnLink(course.id, course.trackId)}
                               className={`px-3 py-2.5 md:py-2 ${style.light} ${style.text}
                                          text-xs font-medium rounded-xl
                                          hover:opacity-80 transition-opacity
@@ -397,7 +398,7 @@ export default function StudentDashboardPage() {
                             </div>
                           </div>
                           <Link
-                            href={`/courses/${course.id}/learn`}
+                            href={getCourseLearnLink(course.id, course.trackId)}
                             className="px-3 py-2.5 md:py-2 bg-gray-50 text-gray-600
                                        text-xs font-medium rounded-xl
                                        hover:bg-gray-100 transition-colors

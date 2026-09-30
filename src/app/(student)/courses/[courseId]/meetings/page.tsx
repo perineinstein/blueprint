@@ -15,6 +15,7 @@ import { db } from "@/lib/firebase/client";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { Course, Enrollment } from "@/types";
 import Link from "next/link";
+import { getCourseLearnLink } from "@/lib/utils/courseLink";
 import {
   Video,
   Calendar,
@@ -111,7 +112,7 @@ export default function StudentMeetingsPage() {
   return (
     <div className="max-w-2xl">
       <Link
-        href={`/courses/${courseId}/learn`}
+        href={getCourseLearnLink(courseId, course?.trackId)}
         className="inline-flex items-center gap-1.5 text-sm text-gray-400
                    hover:text-gray-600 mb-6 transition-colors"
       >

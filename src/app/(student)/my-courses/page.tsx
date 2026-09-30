@@ -13,6 +13,7 @@ import {
 import { db } from "@/lib/firebase/client";
 import { Enrollment, Course } from "@/types";
 import Link from "next/link";
+import { getCourseLearnLink } from "@/lib/utils/courseLink";
 import { formatPrice } from "@/lib/utils/formatting";
 import CourseThumbnail from "@/components/student/CourseThumbnail";
 import { getCourseColor } from "@/lib/utils/courseColors";
@@ -181,7 +182,7 @@ export default function MyCoursesPage() {
                 </div>
 
                 <Link
-                  href={`/courses/${course.id}/learn`}
+                  href={getCourseLearnLink(course.id, course.trackId)}
                   className={`block w-full text-center px-4 py-2 ${color.light}
                              ${color.text} text-sm font-medium rounded-lg
                              hover:opacity-80 transition-opacity`}
