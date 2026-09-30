@@ -29,47 +29,56 @@ export default function CourseDetailPage() {
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [loading, setLoading] = useState(true);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [materialsVisible, setMaterialsVisible] = useState(true);
 
   const fetchAll = useCallback(async () => {
     if (!appUser) return;
 
-    const [courseSnap, materialsSnap] = await Promise.all([
-      getDoc(doc(db, "courses", courseId)),
-      getDocs(
-        query(
-          collection(db, "courses", courseId, "materials"),
-          orderBy("order", "asc")
-        )
-      ),
-    ]);
+    try {
+      // Course info is readable by any signed-in student. Materials and the
+      // enrollment check must not be able to break the page: materials are
+      // enrollment-gated by the security rules, so a denied read is expected
+      // for students who haven't enrolled.
+      const [courseSnap, materialsSnap, enrollmentSnap] = await Promise.all([
+        getDoc(doc(db, "courses", courseId)),
+        getDocs(
+          query(
+            collection(db, "courses", courseId, "materials"),
+            orderBy("order", "asc")
+          )
+        ).catch(() => null),
+        getDoc(doc(db, "enrollments", `${appUser.id}_${courseId}`)).catch(
+          () => null
+        ),
+      ]);
 
-    if (courseSnap.exists()) {
-      setCourse({ id: courseSnap.id, ...courseSnap.data() } as Course);
-    }
-
-    setMaterials(
-      materialsSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Material))
-    );
-
-    // Check enrollment using composite ID
-    const enrollmentId = `${appUser.id}_${courseId}`;
-    const enrollmentSnap = await getDoc(
-      doc(db, "enrollments", enrollmentId)
-    );
-
-    if (enrollmentSnap.exists()) {
-      const e = {
-        id: enrollmentSnap.id,
-        ...enrollmentSnap.data(),
-      } as Enrollment;
-      const now = new Date();
-      const expiry = e.expiryDate?.toDate();
-      if (e.status === "active" && expiry && expiry > now) {
-        setEnrollment(e);
+      if (courseSnap.exists()) {
+        setCourse({ id: courseSnap.id, ...courseSnap.data() } as Course);
       }
-    }
 
-    setLoading(false);
+      setMaterialsVisible(materialsSnap !== null);
+      setMaterials(
+        materialsSnap
+          ? materialsSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Material))
+          : []
+      );
+
+      if (enrollmentSnap?.exists()) {
+        const e = {
+          id: enrollmentSnap.id,
+          ...enrollmentSnap.data(),
+        } as Enrollment;
+        const now = new Date();
+        const expiry = e.expiryDate?.toDate();
+        if (e.status === "active" && expiry && expiry > now) {
+          setEnrollment(e);
+        }
+      }
+    } catch (err) {
+      console.error("Course detail fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [appUser, courseId]);
 
   useEffect(() => {
@@ -146,12 +155,14 @@ export default function CourseDetailPage() {
               </p>
             </div>
           )}
-          <div>
-            <p className="text-xs text-gray-400">Materials</p>
-            <p className="text-sm font-medium text-gray-900">
-              {materials.length} items
-            </p>
-          </div>
+          {materialsVisible && (
+            <div>
+              <p className="text-xs text-gray-400">Materials</p>
+              <p className="text-sm font-medium text-gray-900">
+                {materials.length} items
+              </p>
+            </div>
+          )}
         </div>
 
         {/* CTA */}
@@ -244,7 +255,9 @@ export default function CourseDetailPage() {
               <span className="text-2xl">🔒</span>
             </div>
             <h3 className="text-sm font-semibold text-gray-900 mb-2">
-              {materials.length} lesson{materials.length !== 1 ? "s" : ""} locked
+              {materialsVisible
+                ? `${materials.length} lesson${materials.length !== 1 ? "s" : ""} locked`
+                : "Course content locked"}
             </h3>
             <p className="text-xs text-gray-400 mb-6 max-w-xs mx-auto">
               Enroll in this course to unlock all materials, videos, PDFs,

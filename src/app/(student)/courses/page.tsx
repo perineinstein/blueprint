@@ -1,38 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy,
-} from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { Course } from "@/types";
 import { formatPrice } from "@/lib/utils/formatting";
 import Link from "next/link";
 import CourseThumbnail from "@/components/student/CourseThumbnail";
 
 export default function CourseCataloguePage() {
+  const { user, loading: authLoading } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    // Wait for Firebase Auth to restore the session, otherwise the read goes
+    // out unauthenticated.
+    if (authLoading || !user) return;
     async function fetchCourses() {
-      const q = query(
-        collection(db, "courses"),
-        where("published", "==", true),
-        orderBy("createdAt", "desc")
-      );
-      const snap = await getDocs(q);
-      setCourses(
-        snap.docs.map((d) => ({ id: d.id, ...d.data() } as Course))
-      );
-      setLoading(false);
+      try {
+        // The published filter must stay in the query: security rules do not
+        // filter results, they reject queries that could return unpublished docs.
+        // Sorted client-side to avoid needing a composite index.
+        const snap = await getDocs(
+          query(collection(db, "courses"), where("published", "==", true))
+        );
+        const list = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Course));
+        list.sort(
+          (a, b) =>
+            (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0)
+        );
+        setCourses(list);
+      } catch (err) {
+        console.error("Courses fetch error:", err);
+        setError("Couldn't load courses. Please refresh and try again.");
+      } finally {
+        setLoading(false);
+      }
     }
     fetchCourses();
-  }, []);
+  }, [authLoading, user]);
 
   return (
     <div>
@@ -45,6 +54,10 @@ export default function CourseCataloguePage() {
 
       {loading ? (
         <div className="text-sm text-gray-400">Loading courses...</div>
+      ) : error ? (
+        <div className="bg-red-50 rounded-2xl p-6 text-sm text-red-600">
+          {error}
+        </div>
       ) : courses.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
           <p className="text-gray-400 text-sm">
