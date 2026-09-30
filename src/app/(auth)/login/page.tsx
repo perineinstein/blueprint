@@ -14,7 +14,7 @@ import { auth, db } from "@/lib/firebase/client";
 import { GraduationCap, Hand, Mail } from "lucide-react";
 
 export default function AuthPage() {
-  const { login, register } = useAuth();
+  const { login, register, refreshAppUser } = useAuth();
   const router = useRouter();
 
   const [activeView, setActiveView] = useState<"login" | "register">("login");
@@ -103,6 +103,14 @@ export default function AuthPage() {
 
   // ── Google sign in ──────────────────────────────────────
   async function handleGoogle() {
+    // Show the error on whichever form the user is looking at.
+    const showError = (message: string) =>
+      activeView === "register"
+        ? setRegError(message)
+        : setLoginError(message);
+
+    setLoginError("");
+    setRegError("");
     setGoogleLoading(true);
     try {
       const provider = new GoogleAuthProvider();
@@ -123,6 +131,10 @@ export default function AuthPage() {
         });
       }
 
+      // onAuthStateChanged fires before the user doc above exists, so pull it
+      // into the auth context explicitly.
+      await refreshAppUser();
+
       // Set session cookie
       const idToken = await user.getIdToken();
       const sessionRes = await fetch("/api/auth/session", {
@@ -134,13 +146,14 @@ export default function AuthPage() {
       if (!sessionRes.ok) {
         const errData = await sessionRes.json().catch(() => ({}));
         console.error("Session error:", sessionRes.status, errData);
-        setLoginError("Authentication failed. Please try again.");
+        showError("Authentication failed. Please try again.");
         return;
       }
 
       router.push("/dashboard");
     } catch (err: any) {
-      setLoginError(firebaseError(err.code));
+      console.error("Google sign-in error:", err?.code, err?.message);
+      showError(firebaseError(err?.code));
     } finally {
       setGoogleLoading(false);
     }
@@ -624,14 +637,16 @@ function firebaseError(code: string): string {
       "This domain is not authorized for password reset. Contact support.",
     "auth/invalid-continue-uri":
       "Password reset is misconfigured. Contact support.",
-    "auth/network-request-failed": "Network error. Check your connection.",
-    "auth/popup-closed-by-user": "Google sign-in was cancelled.",
-    "auth/cancelled-popup-request": "Only one popup allowed at a time.",
+    "auth/network-request-failed":
+      "Network error. Check your connection and try again.",
+    "auth/popup-closed-by-user": "Sign-in was cancelled.",
+    "auth/cancelled-popup-request":
+      "Only one sign-in popup allowed at a time.",
     "auth/unauthorized-domain":
-      "This domain is not authorized for sign-in. Contact support.",
-    "auth/internal-error": "An internal error occurred. Please try again.",
+      "This domain is not authorized. Please contact support.",
+    "auth/internal-error": "An error occurred. Please try again.",
     "auth/popup-blocked":
-      "Popup was blocked. Please allow popups for this site.",
+      "Popup was blocked. Please allow popups for this site and try again.",
   };
   return errors[code] ?? "Something went wrong. Please try again.";
 }

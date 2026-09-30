@@ -25,6 +25,7 @@ export interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshAppUser: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -34,6 +35,7 @@ export const AuthContext = createContext<AuthContextType>({
   register: async () => {},
   login: async () => {},
   logout: async () => {},
+  refreshAppUser: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -117,9 +119,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAppUser(null);
   }
 
+  // Re-read users/{uid}. Needed after Google sign-in creates the user doc:
+  // onAuthStateChanged fires before that doc exists, so appUser would
+  // otherwise stay null until the next page load.
+  async function refreshAppUser() {
+    const current = auth.currentUser;
+    if (!current) return;
+    const docSnap = await getDoc(doc(db, "users", current.uid));
+    if (docSnap.exists()) {
+      setAppUser({ id: docSnap.id, ...docSnap.data() } as AppUser);
+    }
+  }
+
   return (
     <AuthContext.Provider
-      value={{ user, appUser, loading, register, login, logout }}
+      value={{
+        user,
+        appUser,
+        loading,
+        register,
+        login,
+        logout,
+        refreshAppUser,
+      }}
     >
       {children}
     </AuthContext.Provider>

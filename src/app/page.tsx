@@ -18,6 +18,7 @@ import { db } from "@/lib/firebase/client";
 import { Course } from "@/types";
 import { formatPrice } from "@/lib/utils/formatting";
 import CourseThumbnail from "@/components/student/CourseThumbnail";
+import DeleteReviewButton from "@/components/student/DeleteReviewButton";
 import Image from "next/image";
 
 // ── Types ─────────────────────────────────────────────────
@@ -274,13 +275,18 @@ export default function LandingPage() {
   const allReviews = [
     ...reviews.map((r) => ({
       id: r.id,
+      userId: r.userId as string | undefined,
       userName: r.userName,
       role: "Blueprint Student",
       rating: r.rating,
       comment: r.comment,
       isReal: true,
     })),
-    ...HARDCODED_REVIEWS.map((r) => ({ ...r, isReal: false })),
+    ...HARDCODED_REVIEWS.map((r) => ({
+      ...r,
+      userId: undefined as string | undefined,
+      isReal: false,
+    })),
   ].slice(0, 6);
 
   return (
@@ -997,9 +1003,19 @@ export default function LandingPage() {
             {allReviews.map((review) => (
               <div
                 key={review.id}
-                className="bg-white rounded-2xl p-6 shadow-sm border
+                className="relative bg-white rounded-2xl p-6 shadow-sm border
                            border-gray-100 hover:shadow-md transition-all"
               >
+                {review.isReal &&
+                  appUser &&
+                  review.userId === appUser.id && (
+                    <DeleteReviewButton
+                      reviewId={review.id}
+                      onDeleted={(id) =>
+                        setReviews((prev) => prev.filter((r) => r.id !== id))
+                      }
+                    />
+                  )}
                 <div className="flex items-center gap-1 mb-4">
                   {[...Array(review.rating)].map((_, j) => (
                     <span key={j} className="text-yellow-400">★</span>
