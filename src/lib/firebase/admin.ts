@@ -1,6 +1,5 @@
 import { initializeApp, getApps, App, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { getAuth } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
 
 function getAdminApp(): App {
@@ -37,7 +36,9 @@ function getAdminApp(): App {
 const adminApp = getAdminApp();
 
 export const adminDb = getFirestore(adminApp);
-export const adminAuth = getAuth(adminApp);
+// Do NOT add adminAuth / firebase-admin/auth here. It pulls in jwks-rsa -> jose
+// (ESM-only), which breaks every route importing this file on Vercel/Turbopack.
+// Verify tokens with the REST API in verifyAuth.ts instead.
 export const adminStorage = getStorage(adminApp);
 
 export default adminApp;

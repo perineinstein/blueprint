@@ -1,42 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
+import { verifyAuthToken } from "@/lib/firebase/verifyAuth";
 import { rateLimit } from "@/lib/rateLimit";
 
-// Verify token using Firebase REST API (avoids firebase-admin/auth ESM issue)
-async function verifyToken(
-  request: NextRequest
-): Promise<{ uid: string } | null> {
-  try {
-    const authHeader = request.headers.get("Authorization");
-    const sessionCookie = request.cookies.get("session")?.value;
-    const token = authHeader?.startsWith("Bearer ")
-      ? authHeader.slice(7)
-      : sessionCookie;
+// Account deletion.
+//
+// - Never import firebase-admin/auth here: it pulls in jwks-rsa -> jose (ESM-only),
+//   which fails under Turbopack on Vercel. Token verification lives in
+//   verifyAuth.ts (REST lookup) and the Auth account is deleted via the REST API.
+// - The uid comes only from the verified token, never from the request body.
+// - Firestore access uses the Admin SDK, which bypasses security rules, so no
+//   rule changes are needed for this route.
+// - `payments` are intentionally retained (7-year retention in the privacy policy).
 
-    if (!token) return null;
+const USER_OWNED_COLLECTIONS = [
+  "enrollments",
+  "topicAttempts",
+  "attempts",
+  "reviews",
+] as const;
 
-    const res = await fetch(
-      `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken: token }),
-      }
-    );
-
-    if (!res.ok) return null;
-    const data = await res.json();
-    const user = data.users?.[0];
-    if (!user) return null;
-
-    return { uid: user.localId };
-  } catch {
-    return null;
-  }
+function getToken(request: NextRequest): string | null {
+  const authHeader = request.headers.get("Authorization");
+  if (authHeader?.startsWith("Bearer ")) return authHeader.slice(7);
+  return request.cookies.get("session")?.value ?? null;
 }
 
-// Delete Firebase Auth account using REST API (avoids firebase-admin/auth ESM issue)
-async function deleteAuthAccount(idToken: string): Promise<boolean> {
+// Deletes the caller's own Auth account using their own ID token.
+async function deleteAuthAccount(
+  idToken: string
+): Promise<{ ok: true } | { ok: false; recentLoginRequired: boolean }> {
   try {
     const res = await fetch(
       `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`,
@@ -46,97 +39,95 @@ async function deleteAuthAccount(idToken: string): Promise<boolean> {
         body: JSON.stringify({ idToken }),
       }
     );
-    return res.ok;
-  } catch {
-    return false;
+    if (res.ok) return { ok: true };
+
+    const body = await res.json().catch(() => ({}));
+    const code: string = body?.error?.message ?? "";
+    console.error("Auth account delete failed:", res.status, code);
+    // Already gone counts as success so a retry after a partial failure works.
+    if (code === "USER_NOT_FOUND") return { ok: true };
+    return {
+      ok: false,
+      recentLoginRequired: code.startsWith("CREDENTIAL_TOO_OLD_LOGIN_AGAIN"),
+    };
+  } catch (error) {
+    console.error("Auth account delete request error:", error);
+    return { ok: false, recentLoginRequired: false };
   }
 }
 
-// Batch delete Firestore documents
-async function batchDelete(docRefs: FirebaseFirestore.DocumentReference[]) {
+async function deleteWhereUserId(collectionName: string, uid: string) {
   const BATCH_SIZE = 500;
-  for (let i = 0; i < docRefs.length; i += BATCH_SIZE) {
+  for (;;) {
+    const snap = await adminDb
+      .collection(collectionName)
+      .where("userId", "==", uid)
+      .limit(BATCH_SIZE)
+      .get();
+    if (snap.empty) return;
     const batch = adminDb.batch();
-    docRefs.slice(i, i + BATCH_SIZE).forEach((ref) => batch.delete(ref));
+    snap.docs.forEach((d) => batch.delete(d.ref));
     await batch.commit();
+    if (snap.size < BATCH_SIZE) return;
   }
 }
 
-export async function DELETE(request: NextRequest) {
-  // Rate limit
-  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
   const { allowed } = rateLimit(`delete-account:${ip}`, {
-    windowMs: 60 * 60 * 1000, // 1 hour
+    windowMs: 60 * 60 * 1000,
     max: 5,
   });
   if (!allowed) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  // Verify auth
-  const user = await verifyToken(request);
-  if (!user) {
+  const user = await verifyAuthToken(request);
+  const idToken = getToken(request);
+  if (!user || !idToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   const { uid } = user;
 
-  // Get the token for Auth deletion
-  const authHeader = request.headers.get("Authorization");
-  const sessionCookie = request.cookies.get("session")?.value;
-  const idToken = authHeader?.startsWith("Bearer ")
-    ? authHeader.slice(7)
-    : sessionCookie ?? "";
-
   try {
-    // 1. Delete enrollments
-    const enrollmentsSnap = await adminDb
-      .collection("enrollments")
-      .where("userId", "==", uid)
-      .get();
-    await batchDelete(enrollmentsSnap.docs.map((d) => d.ref));
-
-    // 2. Delete topic attempts
-    const topicAttemptsSnap = await adminDb
-      .collection("topicAttempts")
-      .where("userId", "==", uid)
-      .get();
-    await batchDelete(topicAttemptsSnap.docs.map((d) => d.ref));
-
-    // 3. Delete legacy attempts
-    const attemptsSnap = await adminDb
-      .collection("attempts")
-      .where("userId", "==", uid)
-      .get();
-    await batchDelete(attemptsSnap.docs.map((d) => d.ref));
-
-    // 4. Delete reviews
-    const reviewsSnap = await adminDb
-      .collection("reviews")
-      .where("userId", "==", uid)
-      .get();
-    await batchDelete(reviewsSnap.docs.map((d) => d.ref));
-
-    // 5. Delete credentialing enrollment if exists
-    const credSnap = await adminDb
-      .collection("credentialingEnrollments")
-      .doc(uid)
-      .get();
-    if (credSnap.exists) {
-      await adminDb.collection("credentialingEnrollments").doc(uid).delete();
+    const userDoc = await adminDb.collection("users").doc(uid).get();
+    if (userDoc.exists && userDoc.data()?.role === "admin") {
+      return NextResponse.json(
+        { error: "Admin accounts cannot be deleted from here." },
+        { status: 403 }
+      );
     }
 
-    // 6. Delete user document
-    await adminDb.collection("users").doc(uid).delete();
+    // Auth first: if Firebase rejects the token (e.g. stale sign-in), nothing
+    // has been deleted yet and the user can sign in again and retry.
+    const authResult = await deleteAuthAccount(idToken);
+    if (!authResult.ok) {
+      if (authResult.recentLoginRequired) {
+        return NextResponse.json(
+          {
+            error:
+              "For security, please sign out, sign back in, and try deleting your account again.",
+          },
+          { status: 403 }
+        );
+      }
+      return NextResponse.json(
+        { error: "Could not delete your account. Please try again." },
+        { status: 500 }
+      );
+    }
 
-    // 7. Delete Firebase Auth account via REST API
-    await deleteAuthAccount(idToken);
+    for (const name of USER_OWNED_COLLECTIONS) {
+      await deleteWhereUserId(name, uid);
+    }
+    await adminDb.collection("credentialingEnrollments").doc(uid).delete();
+    await adminDb.collection("users").doc(uid).delete();
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Account deletion error:", error);
     return NextResponse.json(
-      { error: "Failed to delete account" },
+      { error: "Could not delete your account. Please try again." },
       { status: 500 }
     );
   }
