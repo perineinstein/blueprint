@@ -88,17 +88,13 @@ export default function ModulePage() {
     if (!appUser) return;
 
     try {
-      // Check enrollment
-      const enrollmentId = `${appUser.id}_${courseId}`;
-      const enrollSnap = await getDoc(doc(db, "enrollments", enrollmentId));
-      if (!enrollSnap.exists()) {
-        router.push(`/courses/${courseId}`);
-        return;
-      }
-      const e = { id: enrollSnap.id, ...enrollSnap.data() } as Enrollment;
-      setEnrollment(e);
-
-      const [courseSnap, moduleSnap, topicsSnap] = await Promise.all([
+      // Fire every top-level read in parallel: enrollment, course, module,
+      // topics, and ALL of this user's attempts for this module (one query
+      // instead of one per quiz).
+      const enrollPromise = getDoc(
+        doc(db, "enrollments", `${appUser.id}_${courseId}`)
+      );
+      const restPromise = Promise.all([
         getDoc(doc(db, "courses", courseId)),
         getDoc(doc(db, "courses", courseId, "modules", moduleId)),
         getDocs(
@@ -114,7 +110,28 @@ export default function ModulePage() {
             orderBy("order", "asc")
           )
         ),
+        getDocs(
+          query(
+            collection(db, "topicAttempts"),
+            where("userId", "==", appUser.id),
+            where("moduleId", "==", moduleId)
+          )
+        ),
       ]);
+      // If the user is not enrolled we redirect without awaiting these, so
+      // make sure a rejected read can't surface as an unhandled rejection.
+      restPromise.catch(() => {});
+
+      const enrollSnap = await enrollPromise;
+      if (!enrollSnap.exists()) {
+        router.push(`/courses/${courseId}`);
+        return;
+      }
+      const e = { id: enrollSnap.id, ...enrollSnap.data() } as Enrollment;
+      setEnrollment(e);
+
+      const [courseSnap, moduleSnap, topicsSnap, attemptsSnap] =
+        await restPromise;
 
       if (courseSnap.exists())
         setCourse({ id: courseSnap.id, ...courseSnap.data() } as Course);
@@ -125,25 +142,44 @@ export default function ModulePage() {
         (d) => ({ id: d.id, ...d.data() } as Topic)
       );
 
+      // Latest attempt (highest attemptNumber) per quiz
+      const latestAttemptByQuiz = new Map<string, TopicAttempt>();
+      for (const a of attemptsSnap.docs) {
+        const attempt = { id: a.id, ...a.data() } as TopicAttempt;
+        const current = latestAttemptByQuiz.get(attempt.quizId);
+        if (
+          !current ||
+          (attempt.attemptNumber ?? 0) > (current.attemptNumber ?? 0)
+        ) {
+          latestAttemptByQuiz.set(attempt.quizId, attempt);
+        }
+      }
+
       const completedTopics: string[] = e.completedTopics ?? [];
       const topicProgress: Record<string, string[]> =
         e.topicMaterialsCompleted ?? {};
       const quizProgress: Record<string, string[]> =
         e.topicQuizzesPassed ?? {};
 
-      // Build topic statuses + assessment data
+      // Fetch materials + quizzes for every topic in parallel
+      const topicContents = await Promise.all(
+        rawTopics.map((topic) => {
+          const basePath = `courses/${courseId}/modules/${moduleId}/topics/${topic.id}`;
+          return Promise.all([
+            getDocs(collection(db, basePath, "materials")),
+            getDocs(collection(db, basePath, "quizzes")),
+          ]);
+        })
+      );
+
+      // Build topic statuses + assessment data (no further reads)
       const allAssessments: AssessmentItem[] = [];
       let totalScore = 0;
       let totalPossible = 0;
 
-      const topicsWithStatus: TopicWithStatus[] = await Promise.all(
-        rawTopics.map(async (topic, index) => {
-          const basePath = `courses/${courseId}/modules/${moduleId}/topics/${topic.id}`;
-
-          const [matsSnap, quizzesSnap] = await Promise.all([
-            getDocs(collection(db, basePath, "materials")),
-            getDocs(collection(db, basePath, "quizzes")),
-          ]);
+      const topicsWithStatus: TopicWithStatus[] = rawTopics.map(
+        (topic, index) => {
+          const [matsSnap, quizzesSnap] = topicContents[index];
 
           const materialsTotal = matsSnap.size;
           const materialsCompleted = (topicProgress[topic.id] ?? []).length;
@@ -167,24 +203,12 @@ export default function ModulePage() {
               ...quizDoc.data(),
             } as TopicQuiz;
 
-            // Get latest attempt for this quiz
-            const attemptsSnap = await getDocs(
-              query(
-                collection(db, "topicAttempts"),
-                where("userId", "==", appUser.id),
-                where("quizId", "==", quizDoc.id)
-              )
-            );
+            const latestAttempt = latestAttemptByQuiz.get(quizDoc.id) ?? null;
 
-            const attempts = attemptsSnap.docs
-              .map((a) => ({ id: a.id, ...a.data() } as TopicAttempt))
-              .sort(
-                (a, b) => (b.attemptNumber ?? 0) - (a.attemptNumber ?? 0)
-              );
-
-            const latestAttempt = attempts[0] ?? null;
-
-            if (latestAttempt?.status === "graded" && latestAttempt.percentScore !== null) {
+            if (
+              latestAttempt?.status === "graded" &&
+              latestAttempt.percentScore !== null
+            ) {
               totalScore += latestAttempt.percentScore;
               totalPossible += 100;
             }
@@ -211,7 +235,7 @@ export default function ModulePage() {
             quizzesPassed,
             quizzesTotal,
           };
-        })
+        }
       );
 
       setTopics(topicsWithStatus);

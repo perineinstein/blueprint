@@ -40,17 +40,33 @@ export default function EnrollmentsPage() {
           collection(db, "enrollments")
         );
 
+        const rawEnrollments = enrollmentsSnap.docs.map(
+          (d) => ({ id: d.id, ...d.data() } as Enrollment)
+        );
+
+        // Fetch each unique user / course once, then look up from maps
+        const userIds = [...new Set(rawEnrollments.map((e) => e.userId))];
+        const courseIds = [...new Set(rawEnrollments.map((e) => e.courseId))];
+
+        const [userSnaps, courseSnaps] = await Promise.all([
+          Promise.all(userIds.map((id) => getDoc(doc(db, "users", id)))),
+          Promise.all(courseIds.map((id) => getDoc(doc(db, "courses", id)))),
+        ]);
+
+        const usersById = new Map<string, AppUser | undefined>(
+          userSnaps.map((s, i) => [userIds[i], s.data() as AppUser | undefined])
+        );
+        const coursesById = new Map<string, Course | undefined>(
+          courseSnaps.map((s, i) => [
+            courseIds[i],
+            s.data() as Course | undefined,
+          ])
+        );
+
         const enriched = await Promise.all(
-          enrollmentsSnap.docs.map(async (d) => {
-            const enrollment = { id: d.id, ...d.data() } as Enrollment;
-
-            const [userSnap, courseSnap] = await Promise.all([
-              getDoc(doc(db, "users", enrollment.userId)),
-              getDoc(doc(db, "courses", enrollment.courseId)),
-            ]);
-
-            const user = userSnap.data() as AppUser | undefined;
-            const course = courseSnap.data() as Course | undefined;
+          rawEnrollments.map(async (enrollment) => {
+            const user = usersById.get(enrollment.userId);
+            const course = coursesById.get(enrollment.courseId);
 
             // Check for exam attempts for this student + course
             let examAttempt: EnrollmentWithDetails["examAttempt"] = null;

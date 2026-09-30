@@ -139,31 +139,32 @@ export default function AdminCredentialingPage() {
   async function fetchData() {
     try {
       const snap = await getDocs(collection(db, "credentialingEnrollments"));
-      const enriched = await Promise.all(
-        snap.docs.map(async (d) => {
-          const enrollment = {
-            id: d.id,
-            ...d.data(),
-          } as CredentialingEnrollment;
+      const rawEnrollments = snap.docs.map(
+        (d) => ({ id: d.id, ...d.data() } as CredentialingEnrollment)
+      );
+
+      // Fetch each unique user once, then look up from a map
+      const userIds = [...new Set(rawEnrollments.map((e) => e.userId))];
+      const usersById = new Map<string, AppUser | undefined>();
+      await Promise.all(
+        userIds.map(async (id) => {
           try {
-            const userSnap = await getDoc(
-              doc(db, "users", enrollment.userId)
-            );
-            const u = userSnap.data() as AppUser | undefined;
-            return {
-              ...enrollment,
-              userName: u?.name ?? "Unknown",
-              userEmail: u?.email ?? "—",
-            } as EnrollmentWithUser;
+            const userSnap = await getDoc(doc(db, "users", id));
+            usersById.set(id, userSnap.data() as AppUser | undefined);
           } catch {
-            return {
-              ...enrollment,
-              userName: "Unknown",
-              userEmail: "—",
-            } as EnrollmentWithUser;
+            usersById.set(id, undefined);
           }
         })
       );
+
+      const enriched = rawEnrollments.map((enrollment) => {
+        const u = usersById.get(enrollment.userId);
+        return {
+          ...enrollment,
+          userName: u?.name ?? "Unknown",
+          userEmail: u?.email ?? "—",
+        } as EnrollmentWithUser;
+      });
       setEnrollments(enriched);
     } catch (err) {
       console.error(err);

@@ -66,6 +66,17 @@ export default function StudentDashboardPage() {
       if (!appUser) return;
 
       try {
+        // Announcements are independent of enrollments — fetch in parallel.
+        // Failure (e.g. missing index) is non-fatal.
+        const announcementsPromise = getDocs(
+          query(
+            collection(db, "announcements"),
+            where("published", "==", true),
+            orderBy("createdAt", "desc"),
+            limit(3)
+          )
+        ).catch(() => null);
+
         // Fetch enrollments
         const enrollSnap = await getDocs(
           query(
@@ -75,27 +86,35 @@ export default function StudentDashboardPage() {
           )
         );
 
-        const enrolledCourses: EnrolledCourse[] = [];
-        await Promise.all(
-          enrollSnap.docs.map(async (d) => {
-            const enrollment = {
-              id: d.id,
-              ...d.data(),
-            } as Enrollment;
-            const expiry = enrollment.expiryDate?.toDate();
-            if (!expiry || expiry < new Date()) return;
+        const now = new Date();
+        const validEnrollments = enrollSnap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as Enrollment))
+          .filter((e) => {
+            const expiry = e.expiryDate?.toDate();
+            return !!expiry && expiry >= now;
+          });
 
-            const courseSnap = await getDoc(
-              doc(db, "courses", enrollment.courseId)
-            );
-            if (!courseSnap.exists()) return;
-            enrolledCourses.push({
-              id: courseSnap.id,
-              ...courseSnap.data(),
-              enrollment,
-            } as EnrolledCourse);
-          })
+        // Fetch each unique course once, then look up from a map
+        const courseIds = [
+          ...new Set(validEnrollments.map((e) => e.courseId)),
+        ];
+        const courseSnaps = await Promise.all(
+          courseIds.map((id) => getDoc(doc(db, "courses", id)))
         );
+        const coursesById = new Map(
+          courseSnaps.filter((s) => s.exists()).map((s) => [s.id, s])
+        );
+
+        const enrolledCourses: EnrolledCourse[] = [];
+        for (const enrollment of validEnrollments) {
+          const courseSnap = coursesById.get(enrollment.courseId);
+          if (!courseSnap) continue;
+          enrolledCourses.push({
+            id: courseSnap.id,
+            ...courseSnap.data(),
+            enrollment,
+          } as EnrolledCourse);
+        }
 
         // Group by track
         const byTrack: Record<TrackId, EnrolledCourse[]> = {
@@ -119,23 +138,13 @@ export default function StudentDashboardPage() {
         setTrackSummaries(summaries);
         setUntrackedCourses(untracked);
 
-        // Fetch announcements
-        try {
-          const annSnap = await getDocs(
-            query(
-              collection(db, "announcements"),
-              where("published", "==", true),
-              orderBy("createdAt", "desc"),
-              limit(3)
-            )
-          );
+        const annSnap = await announcementsPromise;
+        if (annSnap) {
           setAnnouncements(
             annSnap.docs.map(
               (d) => ({ id: d.id, ...d.data() } as Announcement)
             )
           );
-        } catch {
-          // Index might not exist yet — ignore
         }
       } catch (err) {
         console.error("Dashboard error:", err);

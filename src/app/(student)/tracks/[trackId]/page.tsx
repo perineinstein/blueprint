@@ -47,26 +47,27 @@ export default function TrackCoursesPage() {
       if (!appUser) return;
 
       try {
-        // Fetch courses for this track
-        const coursesSnap = await getDocs(
-          query(
-            collection(db, "courses"),
-            where("trackId", "==", trackId),
-            where("published", "==", true)
-          )
-        );
+        // Fetch this track's courses and the user's enrollments in parallel
+        const [coursesSnap, enrollSnap] = await Promise.all([
+          getDocs(
+            query(
+              collection(db, "courses"),
+              where("trackId", "==", trackId),
+              where("published", "==", true)
+            )
+          ),
+          getDocs(
+            query(
+              collection(db, "enrollments"),
+              where("userId", "==", appUser.id)
+            )
+          ),
+        ]);
         const courseList = coursesSnap.docs.map(
           (d) => ({ id: d.id, ...d.data() } as Course)
         );
         setCourses(courseList);
 
-        // Fetch enrollments for this user
-        const enrollSnap = await getDocs(
-          query(
-            collection(db, "enrollments"),
-            where("userId", "==", appUser.id)
-          )
-        );
         const enrollMap: Record<string, Enrollment> = {};
         enrollSnap.docs.forEach((d) => {
           const e = { id: d.id, ...d.data() } as Enrollment;

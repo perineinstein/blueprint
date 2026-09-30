@@ -50,11 +50,22 @@ export default function CourseModulesPage() {
       if (!appUser) return;
 
       try {
-        // Check enrollment
+        // Enrollment, course and modules are independent — fetch in parallel
         const enrollmentId = `${appUser.id}_${courseId}`;
-        const enrollSnap = await getDoc(
-          doc(db, "enrollments", enrollmentId)
-        );
+        const enrollPromise = getDoc(doc(db, "enrollments", enrollmentId));
+        const courseModulesPromise = Promise.all([
+          getDoc(doc(db, "courses", courseId)),
+          getDocs(
+            query(
+              collection(db, "courses", courseId, "modules"),
+              orderBy("order", "asc")
+            )
+          ),
+        ]);
+        // If we redirect below these are never awaited; avoid unhandled rejections.
+        courseModulesPromise.catch(() => {});
+
+        const enrollSnap = await enrollPromise;
 
         if (!enrollSnap.exists()) {
           router.push(`/courses/${courseId}`);
@@ -69,16 +80,7 @@ export default function CourseModulesPage() {
         }
         setEnrollment(e);
 
-        // Fetch course + modules
-        const [courseSnap, modulesSnap] = await Promise.all([
-          getDoc(doc(db, "courses", courseId)),
-          getDocs(
-            query(
-              collection(db, "courses", courseId, "modules"),
-              orderBy("order", "asc")
-            )
-          ),
-        ]);
+        const [courseSnap, modulesSnap] = await courseModulesPromise;
 
         if (courseSnap.exists()) {
           setCourse({ id: courseSnap.id, ...courseSnap.data() } as Course);

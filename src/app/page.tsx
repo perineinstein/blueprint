@@ -82,6 +82,23 @@ const HARDCODED_REVIEWS = [
   },
 ];
 
+// Published courses rarely change; cache them for the lifetime of the tab so
+// repeat visits to the landing page don't re-read the whole collection.
+let coursesCache: { data: Course[]; fetchedAt: number } | null = null;
+const CACHE_TTL = 5 * 60 * 1000;
+
+async function getCachedCourses(): Promise<Course[]> {
+  if (coursesCache && Date.now() - coursesCache.fetchedAt < CACHE_TTL) {
+    return coursesCache.data;
+  }
+  const snap = await getDocs(
+    query(collection(db, "courses"), where("published", "==", true))
+  );
+  const data = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Course));
+  coursesCache = { data, fetchedAt: Date.now() };
+  return data;
+}
+
 export default function LandingPage() {
   const { appUser, loading } = useAuth();
   const router = useRouter();
@@ -119,18 +136,10 @@ export default function LandingPage() {
   useEffect(() => {
     async function fetchCourses() {
       try {
-        const snap = await getDocs(
-          query(
-            collection(db, "courses"),
-            where("published", "==", true)
-          )
-        );
-        const all = snap.docs.map(
-          (d) => ({ id: d.id, ...d.data() } as Course)
-        );
+        const all = await getCachedCourses();
 
-        // Shuffle and pick 4
-        const shuffled = all.sort(() => Math.random() - 0.5).slice(0, 4);
+        // Shuffle a copy (never mutate the cached array) and pick 4
+        const shuffled = [...all].sort(() => Math.random() - 0.5).slice(0, 4);
         setCourses(shuffled);
       } catch (e) {
         console.error("Courses fetch error:", e);

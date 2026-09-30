@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { TRACKS } from "@/types";
 import { BookOpen, ArrowRight } from "lucide-react";
