@@ -338,7 +338,7 @@ export default function ExamPage() {
   if (submitted) {
     return (
       <div className="max-w-2xl mx-auto py-12">
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center mb-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 md:p-8 text-center mb-6">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center
                           justify-center mx-auto mb-4">
             <span className="text-2xl">✓</span>

@@ -86,11 +86,18 @@ const navItems = [
   
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({
+  mobileOpen = false,
+  onMobileClose,
+}: {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, appUser } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsedState, setCollapsed] = useState(false);
+  const collapsed = collapsedState && !mobileOpen;
   const [profileOpen, setProfileOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -117,9 +124,11 @@ export default function AdminSidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 h-screen flex flex-col z-40",
+        "fixed left-0 top-0 h-screen flex flex-col z-50 md:z-40",
         "bg-white border-r border-gray-100",
         "transition-all duration-300 ease-in-out",
+        "md:translate-x-0",
+        mobileOpen ? "translate-x-0" : "-translate-x-full",
         collapsed ? "w-[72px]" : "w-[260px]"
       )}
     >
@@ -148,7 +157,7 @@ export default function AdminSidebar() {
         {!collapsed && (
           <button
             onClick={() => setCollapsed(true)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg
+            className="w-8 h-8 hidden md:flex items-center justify-center rounded-lg
                        text-gray-400 hover:text-gray-700 hover:bg-gray-100
                        transition-colors"
           >
@@ -158,6 +167,19 @@ export default function AdminSidebar() {
             </svg>
           </button>
         )}
+
+        <button
+          onClick={onMobileClose}
+          aria-label="Close menu"
+          className="md:hidden w-11 h-11 -mr-2 flex items-center justify-center
+                     rounded-lg text-gray-500 hover:text-gray-900
+                     hover:bg-gray-100 transition-colors"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
 
         {collapsed && (
           <button
@@ -210,8 +232,9 @@ export default function AdminSidebar() {
               key={item.id}
               href={item.href}
               title={collapsed ? item.label : undefined}
+              onClick={onMobileClose}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm",
+                "flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl text-sm",
                 "transition-all duration-150 group relative",
                 collapsed ? "justify-center" : "",
                 isActive
@@ -258,7 +281,7 @@ export default function AdminSidebar() {
         <button
           onClick={() => setProfileOpen(!profileOpen)}
           className={cn(
-            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl",
+            "w-full flex items-center gap-3 px-3 py-3 md:py-2.5 rounded-xl",
             "hover:bg-gray-50 transition-colors",
             collapsed ? "justify-center" : "",
             profileOpen ? "bg-gray-50" : ""
@@ -324,7 +347,7 @@ export default function AdminSidebar() {
             <div className="py-1">
               <Link
                 href="/admin"
-                className="flex items-center gap-3 px-4 py-2.5 text-sm
+                className="flex items-center gap-3 px-4 py-3 md:py-2.5 text-sm
                            text-gray-600 hover:bg-gray-50 hover:text-gray-900
                            transition-colors"
                 onClick={() => setProfileOpen(false)}
@@ -343,7 +366,7 @@ export default function AdminSidebar() {
             <div className="border-t border-gray-100 pt-1 mt-1">
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm
+                className="flex items-center gap-3 px-4 py-3 md:py-2.5 text-sm
                            text-red-500 hover:bg-red-50 transition-colors w-full"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none"

@@ -237,7 +237,7 @@ export default function ExamsPage() {
       {/* Existing exams */}
       {exams.length > 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-6">
-          <div className="px-6 py-4 border-b border-gray-100">
+          <div className="px-4 md:px-6 py-4 border-b border-gray-100">
             <h2 className="text-sm font-semibold text-gray-900">
               Existing exams ({exams.length})
             </h2>
@@ -245,7 +245,7 @@ export default function ExamsPage() {
           {exams.map((exam) => (
             <div
               key={exam.id}
-              className="flex items-center justify-between px-6 py-4
+              className="flex items-center justify-between px-4 md:px-6 py-4
                          border-b border-gray-50 last:border-0"
             >
               <div>
@@ -318,7 +318,7 @@ export default function ExamsPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Duration (minutes)

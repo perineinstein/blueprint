@@ -204,7 +204,7 @@ export default function QuizGradePage() {
                          overflow-hidden"
             >
               {/* Attempt header */}
-              <div className="flex items-center justify-between px-6 py-4
+              <div className="flex items-center justify-between px-4 md:px-6 py-4
                               border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br

@@ -159,10 +159,10 @@ export default function LearnPage() {
   );
 
   return (
-    <div className="flex gap-6 h-[calc(100vh-4rem)]">
+    <div className="flex flex-col md:flex-row gap-4 md:gap-6 md:h-[calc(100vh-4rem)]">
 
       {/* Sidebar */}
-      <div className="w-72 flex-shrink-0 bg-white rounded-2xl border border-gray-100 overflow-hidden flex flex-col">
+      <div className="w-full md:w-72 max-h-72 md:max-h-none flex-shrink-0 bg-white rounded-2xl border border-gray-100 overflow-hidden flex flex-col">
         <div className="p-4 border-b border-gray-100">
           <Link
             href={`/courses/${courseId}`}
@@ -301,7 +301,7 @@ export default function LearnPage() {
 
               {/* Note */}
               {activeMaterial.type === "note" && (
-                <div className="p-8">
+                <div className="p-5 md:p-8">
                   <h1 className="text-lg font-semibold text-gray-900 mb-4">
                     {activeMaterial.title}
                   </h1>

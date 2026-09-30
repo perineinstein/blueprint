@@ -161,7 +161,7 @@ export default function EnrollmentsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
         {[
           {
             label: "Total Enrollments",
@@ -197,13 +197,13 @@ export default function EnrollmentsPage() {
       </div>
 
       {/* Search + Filter */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search student or course..."
-          className="flex-1 max-w-sm px-4 py-2 border border-gray-200
+          className="w-full sm:w-auto sm:flex-1 max-w-sm px-4 py-2.5 md:py-2 border border-gray-200
                      rounded-xl text-sm text-gray-900 bg-white
                      focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -212,7 +212,7 @@ export default function EnrollmentsPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-xl text-xs font-medium
+              className={`px-4 py-2.5 md:py-2 rounded-xl text-xs font-medium
                           transition-colors capitalize ${
                             filter === f
                               ? "bg-blue-600 text-white"
@@ -238,28 +238,29 @@ export default function EnrollmentsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] lg:min-w-0">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   STUDENT
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   COURSE
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   STATUS
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   PROGRESS
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   EXAM
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   ENROLLED
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   EXPIRES
                 </th>
               </tr>
@@ -279,7 +280,7 @@ export default function EnrollmentsPage() {
                     className="hover:bg-gray-50 transition-colors"
                   >
                     {/* Student */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div
                           className="w-8 h-8 rounded-full bg-blue-100
@@ -301,7 +302,7 @@ export default function EnrollmentsPage() {
                     </td>
 
                     {/* Course */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-4">
                       <p className="text-sm text-gray-900 font-medium">
                         {enrollment.courseTitle}
                       </p>
@@ -311,7 +312,7 @@ export default function EnrollmentsPage() {
                     </td>
 
                     {/* Status */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5
                                    rounded-full text-xs font-medium ${
@@ -327,7 +328,7 @@ export default function EnrollmentsPage() {
                     </td>
 
                     {/* Progress */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-4">
                       <div className="flex items-center gap-2">
                         <div className="w-20 bg-gray-100 rounded-full h-1.5">
                           <div
@@ -344,7 +345,7 @@ export default function EnrollmentsPage() {
                     </td>
 
                     {/* Exam / Grade */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-4">
                       {enrollment.examAttempt ? (
                         enrollment.examAttempt.status === "graded" ? (
                           <span
@@ -372,7 +373,7 @@ export default function EnrollmentsPage() {
                     </td>
 
                     {/* Enrolled date */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-4">
                       <span className="text-sm text-gray-500">
                         {enrolledDate
                           ? enrolledDate.toLocaleDateString("en-GB", {
@@ -385,7 +386,7 @@ export default function EnrollmentsPage() {
                     </td>
 
                     {/* Expiry date */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 md:px-6 py-4">
                       <span
                         className={`text-sm ${
                           isExpiringSoon
@@ -410,9 +411,10 @@ export default function EnrollmentsPage() {
               })}
             </tbody>
           </table>
+          </div>
 
           {/* Footer */}
-          <div className="px-6 py-3 border-t border-gray-100 bg-gray-50">
+          <div className="px-4 md:px-6 py-3 border-t border-gray-100 bg-gray-50">
             <p className="text-xs text-gray-400">
               Showing {filtered.length} of {enrollments.length} enrollments
             </p>

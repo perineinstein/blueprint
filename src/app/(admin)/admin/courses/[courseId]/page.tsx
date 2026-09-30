@@ -179,7 +179,7 @@ export default function AdminCourseDetailPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
         {[
           {
             label: "Price",
@@ -214,11 +214,11 @@ export default function AdminCourseDetailPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* Students list */}
-        <div className="col-span-2 bg-white rounded-2xl border border-gray-100
+        <div className="md:col-span-2 bg-white rounded-2xl border border-gray-100
                         overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
+          <div className="px-4 md:px-6 py-4 border-b border-gray-100">
             <h2 className="text-sm font-semibold text-gray-900">
               Enrolled students ({activeEnrollments.length})
             </h2>
@@ -233,7 +233,7 @@ export default function AdminCourseDetailPage() {
               {activeEnrollments.map((item: StudentEnrollment) => {
                 const { student, enrollment, latestAttempt } = item;
                 return (
-                  <div key={enrollment.id} className="px-6 py-4">
+                  <div key={enrollment.id} className="px-4 md:px-6 py-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div

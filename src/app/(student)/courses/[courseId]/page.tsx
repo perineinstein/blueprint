@@ -118,7 +118,7 @@ export default function CourseDetailPage() {
       )}
 
       {/* Course header */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-8 mb-6">
+      <div className="bg-white rounded-2xl border border-gray-100 p-5 md:p-8 mb-6">
         <CourseThumbnail
           courseId={courseId}
           title={course.title}
@@ -186,7 +186,7 @@ export default function CourseDetailPage() {
       {isEnrolled ? (
         // ── Enrolled: show full materials list ───────────────
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div className="px-4 md:px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-900">
               Course content
             </h2>
@@ -204,7 +204,7 @@ export default function CourseDetailPage() {
               {materials.map((material, index) => (
                 <div
                   key={material.id}
-                  className="flex items-center gap-4 px-6 py-4
+                  className="flex items-center gap-4 px-4 md:px-6 py-4
                              hover:bg-gray-50 transition-colors"
                 >
                   <span className="text-xs text-gray-300 w-5">
@@ -231,7 +231,7 @@ export default function CourseDetailPage() {
       ) : (
         // ── Not enrolled: show locked paywall state ───────────
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
+          <div className="px-4 md:px-6 py-4 border-b border-gray-100">
             <h2 className="text-sm font-semibold text-gray-900">
               Course content
             </h2>
@@ -263,7 +263,7 @@ export default function CourseDetailPage() {
               {materials.slice(0, 3).map((material, index) => (
                 <div
                   key={material.id}
-                  className="flex items-center gap-4 px-6 py-4 border-b
+                  className="flex items-center gap-4 px-4 md:px-6 py-4 border-b
                              border-gray-50 opacity-40 select-none"
                 >
                   <span className="text-xs text-gray-300 w-5">

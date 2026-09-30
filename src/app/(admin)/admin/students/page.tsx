@@ -85,7 +85,7 @@ export default function StudentsPage() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6">
         {[
           {
             label: "Total Students",
@@ -125,7 +125,7 @@ export default function StudentsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name or email..."
-          className="w-full max-w-sm px-4 py-2 border border-gray-200
+          className="w-full max-w-sm px-4 py-2.5 md:py-2 border border-gray-200
                      rounded-lg text-sm text-gray-900 bg-white
                      focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -142,22 +142,23 @@ export default function StudentsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] lg:min-w-0">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   STUDENT
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   EMAIL
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   ENROLLED
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   COMPLETED
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   JOINED
                 </th>
               </tr>
@@ -169,7 +170,7 @@ export default function StudentsPage() {
                   className="hover:bg-gray-50 transition-colors"
                 >
                   {/* Avatar + Name */}
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div
                         className="w-8 h-8 rounded-full bg-blue-100 flex
@@ -186,14 +187,14 @@ export default function StudentsPage() {
                   </td>
 
                   {/* Email */}
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <span className="text-sm text-gray-500">
                       {student.email}
                     </span>
                   </td>
 
                   {/* Enrollments */}
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5
                                  rounded-full text-xs font-medium ${
@@ -208,7 +209,7 @@ export default function StudentsPage() {
                   </td>
 
                   {/* Completed */}
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5
                                  rounded-full text-xs font-medium ${
@@ -222,7 +223,7 @@ export default function StudentsPage() {
                   </td>
 
                   {/* Joined date */}
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <span className="text-sm text-gray-400">
                       {student.createdAt
                         ? new Date(
@@ -239,6 +240,7 @@ export default function StudentsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

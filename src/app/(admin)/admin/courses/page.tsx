@@ -61,7 +61,7 @@ export default function AdminCoursesPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between gap-3 mb-6 md:mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Courses</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -70,8 +70,8 @@ export default function AdminCoursesPage() {
         </div>
         <Link
           href="/admin/courses/new"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white
-                     text-sm font-medium rounded-lg transition-colors"
+          className="px-4 py-2.5 md:py-2 bg-blue-600 hover:bg-blue-700 text-white
+                     text-sm font-medium rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
         >
           + New course
         </Link>
@@ -92,19 +92,20 @@ export default function AdminCoursesPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] lg:min-w-0">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   COURSE
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   PRICE
                 </th>
-                <th className="text-left text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-left text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   STATUS
                 </th>
-                <th className="text-right text-xs font-medium text-gray-400 px-6 py-4">
+                <th className="text-right text-xs font-medium text-gray-400 px-4 md:px-6 py-4">
                   ACTIONS
                 </th>
               </tr>
@@ -112,7 +113,7 @@ export default function AdminCoursesPage() {
             <tbody className="divide-y divide-gray-50">
               {courses.map((course) => (
                 <tr key={course.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <Link href={`/admin/courses/${course.id}`}>
                       <p className="text-sm font-medium text-gray-900 hover:text-blue-600
                                     transition-colors cursor-pointer">
@@ -123,12 +124,12 @@ export default function AdminCoursesPage() {
                       {course.description}
                     </p>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <span className="text-sm text-gray-700">
                       {formatPrice(course.price)}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         course.published
@@ -139,7 +140,7 @@ export default function AdminCoursesPage() {
                       {course.published ? "Published" : "Draft"}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-4 md:px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => togglePublish(course)}
@@ -194,6 +195,7 @@ export default function AdminCoursesPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

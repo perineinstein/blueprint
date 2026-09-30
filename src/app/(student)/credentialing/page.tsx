@@ -175,7 +175,7 @@ export default function CredentialingPage() {
 
         {/* Hero card */}
         <div className="bg-gradient-to-br from-blue-600 to-blue-800
-                        rounded-2xl p-8 mb-6 text-white relative overflow-hidden">
+                        rounded-2xl p-5 md:p-8 mb-6 text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-10"
             style={{
               backgroundImage:
@@ -196,7 +196,7 @@ export default function CredentialingPage() {
               candidate assessment to your NCLEX-RN examination. No guesswork,
               no confusion.
             </p>
-            <div className="flex items-center gap-6 text-sm">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircle size={16} className="text-blue-200" />
                 <span className="text-blue-100">11 guided stages</span>
@@ -214,7 +214,7 @@ export default function CredentialingPage() {
         </div>
 
         {/* Stage preview */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 mb-6">
           <h3 className="text-sm font-semibold text-gray-900 mb-4">
             Your 11-Stage Journey
           </h3>
@@ -250,8 +250,8 @@ export default function CredentialingPage() {
             {payError}
           </div>
         )}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 flex
-                        items-center justify-between">
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 flex
+                        flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-lg font-bold text-gray-900">
               {formatPrice(price)}
@@ -261,9 +261,9 @@ export default function CredentialingPage() {
           <button
             onClick={handleEnroll}
             disabled={paying}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600
                        hover:bg-blue-700 disabled:bg-blue-400 text-white
-                       font-semibold rounded-xl transition-colors text-sm"
+                       font-semibold rounded-xl transition-colors text-sm w-full sm:w-auto"
           >
             <ShieldCheck size={16} />
             {paying ? "Redirecting..." : "Begin your journey"}
@@ -311,7 +311,7 @@ export default function CredentialingPage() {
 
       {/* ── Progress Overview Card ─────────────────────────── */}
       <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl
-                      p-6 mb-5 text-white relative overflow-hidden">
+                      p-4 md:p-6 mb-5 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10"
           style={{
             backgroundImage:
@@ -348,9 +348,9 @@ export default function CredentialingPage() {
 
           {/* Progress bar */}
           <div className="mb-3">
-            <div className="flex items-center justify-between text-xs mb-1.5">
+            <div className="flex items-center justify-between gap-2 text-xs mb-1.5">
               <span className="text-blue-200">Overall Progress</span>
-              <span className="text-white font-semibold">
+              <span className="text-white font-semibold text-right">
                 {completedCount} of {CREDENTIALING_PHASES.length} stages
               </span>
             </div>
@@ -415,7 +415,7 @@ export default function CredentialingPage() {
       </div>
 
       {/* ── Tabs ─────────────────────────────────────────── */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl mb-5">
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl mb-5 overflow-x-auto">
         {(
           [
             { id: "journey", label: "My Journey" },
@@ -426,7 +426,7 @@ export default function CredentialingPage() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "flex-1 py-2.5 rounded-lg text-sm font-medium transition-all",
+              "flex-1 py-3 md:py-2.5 px-3 whitespace-nowrap rounded-lg text-sm font-medium transition-all",
               activeTab === tab.id
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-500 hover:text-gray-700"
@@ -450,7 +450,7 @@ export default function CredentialingPage() {
             const isLast = index === enrollment.phases.length - 1;
 
             return (
-              <div key={phase.index} className="flex gap-4">
+              <div key={phase.index} className="flex gap-3 md:gap-4">
                 {/* Timeline spine */}
                 <div className="flex flex-col items-center flex-shrink-0">
                   {/* Node */}
@@ -488,7 +488,7 @@ export default function CredentialingPage() {
                 </div>
 
                 {/* Content */}
-                <div className={cn("flex-1 pb-5", isLast && "pb-2")}>
+                <div className={cn("flex-1 min-w-0 pb-5", isLast && "pb-2")}>
                   <button
                     onClick={() =>
                       setExpandedPhase(
@@ -634,7 +634,7 @@ export default function CredentialingPage() {
               {resources.map((resource) => (
                 <div
                   key={resource.id}
-                  className="bg-white rounded-2xl border border-gray-100 p-5"
+                  className="bg-white rounded-2xl border border-gray-100 p-4 md:p-5"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center
@@ -648,7 +648,7 @@ export default function CredentialingPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-semibold text-gray-900 break-words">
                         {resource.title}
                       </p>
                       <p className="text-xs text-gray-400 capitalize mt-0.5">
@@ -660,7 +660,7 @@ export default function CredentialingPage() {
                        <a  href={resource.fileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                        className="flex items-center gap-1.5 px-3 py-2.5 md:py-1.5 rounded-lg
                                    text-xs font-medium border border-blue-200 bg-blue-50
                                    text-blue-700 hover:bg-blue-100 transition-colors
                                    flex-shrink-0"
@@ -674,7 +674,7 @@ export default function CredentialingPage() {
                        <a href={resource.linkUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+                        className="flex items-center gap-1.5 px-3 py-2.5 md:py-1.5 rounded-lg
                                    text-xs font-medium border border-blue-200 bg-blue-50
                                    text-blue-700 hover:bg-blue-100 transition-colors
                                    flex-shrink-0"

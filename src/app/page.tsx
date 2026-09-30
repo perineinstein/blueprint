@@ -294,14 +294,14 @@ export default function LandingPage() {
             : "bg-transparent py-5"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <Image
               src="/logo.png"
               alt="Blueprint logo"
               width={80}
               height={80}
-              className="rounded-lg"
+              className="rounded-lg w-12 h-12 md:w-20 md:h-20"
             />
             <span className="font-bold text-lg text-gray-900">Blueprint</span>
           </Link>
@@ -319,17 +319,17 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 md:gap-3">
             <Link
               href="/login"
-              className="px-4 py-2 text-sm font-medium text-gray-700
+              className="px-3 md:px-4 py-2.5 md:py-2 text-sm font-medium text-gray-700
                          hover:text-blue-600 transition-colors"
             >
               Log in
             </Link>
             <Link
               href="/register"
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white
+              className="px-4 md:px-5 py-2.5 md:py-2 bg-blue-600 hover:bg-blue-700 text-white
                          text-sm font-semibold rounded-xl transition-all
                          shadow-md shadow-blue-500/20"
             >
@@ -342,7 +342,7 @@ export default function LandingPage() {
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section
         id="home"
-        className="relative min-h-screen flex items-center pt-20
+        className="relative min-h-screen flex items-center pt-20 pb-12 md:pb-0
                    bg-gradient-to-br from-blue-50 via-white to-indigo-50
                    overflow-hidden"
       >
@@ -353,7 +353,7 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-100
                         rounded-full translate-y-1/2 -translate-x-1/3 opacity-30" />
 
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 gap-12
+        <div className="max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12
                         items-center relative z-10">
           {/* Left */}
           <div>
@@ -371,7 +371,7 @@ export default function LandingPage() {
             </div>
 
             <h1
-              className={`text-5xl font-bold text-gray-900 leading-tight mb-6
+              className={`text-3xl md:text-5xl font-bold text-gray-900 leading-tight mb-6
                           transition-all duration-700 delay-100 ${
                             visible
                               ? "opacity-100 translate-y-0"
@@ -385,7 +385,7 @@ export default function LandingPage() {
             </h1>
 
             <p
-              className={`text-lg text-gray-500 mb-8 leading-relaxed
+              className={`text-base md:text-lg text-gray-500 mb-8 leading-relaxed
                           transition-all duration-700 delay-200 ${
                             visible
                               ? "opacity-100 translate-y-0"
@@ -398,7 +398,7 @@ export default function LandingPage() {
             </p>
 
             <div
-              className={`flex items-center gap-4 mb-10 transition-all
+              className={`flex flex-wrap items-center gap-3 md:gap-4 mb-10 transition-all
                           duration-700 delay-300 ${
                             visible
                               ? "opacity-100 translate-y-0"
@@ -407,7 +407,7 @@ export default function LandingPage() {
             >
               <Link
                 href="/register"
-                className="px-7 py-3.5 bg-blue-600 hover:bg-blue-700
+                className="px-6 md:px-7 py-3.5 bg-blue-600 hover:bg-blue-700
                            text-white font-semibold rounded-xl transition-all
                            shadow-lg shadow-blue-500/25 hover:-translate-y-0.5
                            text-sm"
@@ -416,7 +416,7 @@ export default function LandingPage() {
               </Link>
               <Link
                 href="#courses"
-                className="flex items-center gap-2 px-7 py-3.5 border-2
+                className="flex items-center gap-2 px-6 md:px-7 py-3.5 border-2
                            border-gray-200 hover:border-blue-300 text-gray-700
                            hover:text-blue-600 font-semibold rounded-xl
                            transition-all text-sm"
@@ -431,7 +431,7 @@ export default function LandingPage() {
 
             {/* Stats */}
             <div
-              className={`flex items-center gap-8 transition-all duration-700
+              className={`flex flex-wrap items-center gap-x-6 gap-y-3 md:gap-8 transition-all duration-700
                           delay-400 ${
                             visible
                               ? "opacity-100 translate-y-0"
@@ -481,7 +481,7 @@ export default function LandingPage() {
               </div>
 
               {/* Floating card — Students */}
-              <div className="absolute bottom-8 -left-4 bg-white rounded-2xl
+              <div className="absolute bottom-8 -left-2 md:-left-4 bg-white rounded-2xl
                               shadow-xl p-4 flex items-center gap-3
                               min-w-[180px] z-10">
                 <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center
@@ -497,7 +497,7 @@ export default function LandingPage() {
               </div>
 
               {/* Floating card — Rating */}
-              <div className="absolute top-12 -right-4 bg-white rounded-2xl
+              <div className="absolute top-12 -right-2 md:-right-4 bg-white rounded-2xl
                               shadow-xl p-4 min-w-[160px] z-10">
                 <div className="flex items-center gap-0.5 mb-1">
                   {[...Array(5)].map((_, i) => (
@@ -525,7 +525,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Steps ────────────────────────────────────────────── */}
-      <section className="py-20 px-6 bg-white">
+      <section className="py-12 md:py-20 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-blue-600 text-sm font-semibold uppercase
@@ -536,7 +536,7 @@ export default function LandingPage() {
               Easy steps for your learning
             </h2>
           </div>
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {steps.map((step, i) => (
               <StepCard key={i} step={step} index={i} />
             ))}
@@ -547,11 +547,11 @@ export default function LandingPage() {
       {/* ── About ────────────────────────────────────────────── */}
       <section
         id="about"
-        className="py-20 px-6 bg-gradient-to-br from-blue-50 to-indigo-50"
+        className="py-12 md:py-20 px-4 md:px-6 bg-gradient-to-br from-blue-50 to-indigo-50"
       >
-        <div className="max-w-7xl mx-auto grid grid-cols-2 gap-16 items-center">
-          <div className="relative">
-            <div className="bg-blue-200 rounded-3xl h-[420px] flex items-center
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center">
+          <div className="relative mb-6 md:mb-0">
+            <div className="bg-blue-200 rounded-3xl h-[300px] md:h-[420px] flex items-center
                             justify-center overflow-hidden relative">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-400
                               to-blue-600 opacity-20" />
@@ -573,8 +573,8 @@ export default function LandingPage() {
                               rounded-full opacity-40" />
             </div>
 
-            <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl
-                            shadow-xl p-5 flex items-center gap-4">
+            <div className="absolute -bottom-6 -right-2 md:-right-6 bg-white rounded-2xl
+                            shadow-xl p-4 md:p-5 flex items-center gap-3 md:gap-4">
               {[
                 { value: "50+", label: "Courses" },
                 { value: "500+", label: "Students" },
@@ -638,9 +638,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── Courses ──────────────────────────────────────────── */}
-      <section id="courses" className="py-20 px-6 bg-white">
+      <section id="courses" className="py-12 md:py-20 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-end justify-between mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-0 mb-8 md:mb-12">
             <div>
               <p className="text-blue-600 text-sm font-semibold uppercase
                             tracking-widest mb-2">
@@ -660,7 +660,7 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {courses.length > 0
               ? courses.map((course) => (
                   <div
@@ -759,13 +759,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── Enroll CTA ───────────────────────────────────────── */}
-      <section className="py-20 px-6 bg-blue-600 relative overflow-hidden">
+      <section className="py-12 md:py-20 px-4 md:px-6 bg-blue-600 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500 rounded-full
                         -translate-y-1/2 translate-x-1/2 opacity-50" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-700 rounded-full
                         translate-y-1/2 -translate-x-1/2 opacity-50" />
 
-        <div className="max-w-7xl mx-auto grid grid-cols-2 gap-12 items-center
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center
                         relative z-10">
           <div>
             <p className="text-blue-200 text-sm font-semibold uppercase
@@ -808,7 +808,7 @@ export default function LandingPage() {
           </div>
 
           {/* Sign up card */}
-          <div className="bg-white rounded-3xl p-8 shadow-2xl">
+          <div className="bg-white rounded-3xl p-5 md:p-8 shadow-2xl w-full">
             <h3 className="text-lg font-bold text-gray-900 mb-6">
               Create your account
             </h3>
@@ -860,9 +860,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── Testimonials ─────────────────────────────────────── */}
-      <section className="py-20 px-6 bg-gray-50">
+      <section className="py-12 md:py-20 px-4 md:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-end justify-between mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-0 mb-8 md:mb-12">
             <div>
               <p className="text-blue-600 text-sm font-semibold uppercase
                             tracking-widest mb-2">
@@ -993,7 +993,7 @@ export default function LandingPage() {
           )}
 
           {/* Reviews grid */}
-          <div className="grid grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {allReviews.map((review) => (
               <div
                 key={review.id}
@@ -1032,7 +1032,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ──────────────────────────────────────────────── */}
-      <section id="faq" className="py-20 px-6 bg-white">
+      <section id="faq" className="py-12 md:py-20 px-4 md:px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-blue-600 text-sm font-semibold uppercase
@@ -1081,7 +1081,7 @@ export default function LandingPage() {
 
       {/* ── Final CTA ────────────────────────────────────────── */}
       <section
-        className="py-16 px-6 bg-gradient-to-br from-blue-600 to-indigo-700
+        className="py-12 md:py-16 px-4 md:px-6 bg-gradient-to-br from-blue-600 to-indigo-700
                    relative overflow-hidden"
       >
         <div
@@ -1099,11 +1099,11 @@ export default function LandingPage() {
             Join hundreds of students already learning. Sign up free — no
             credit card required to browse.
           </p>
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 md:gap-4">
             <Link
               href="/register"
               className="px-8 py-3.5 bg-white text-blue-700 font-semibold
-                         rounded-xl hover:bg-blue-50 transition-all shadow-xl text-sm"
+                         rounded-xl hover:bg-blue-50 transition-all shadow-xl text-sm text-center"
             >
               Create free account
             </Link>
@@ -1111,7 +1111,7 @@ export default function LandingPage() {
               href="/login"
               className="px-8 py-3.5 border-2 border-white/50 text-white
                          font-semibold rounded-xl hover:border-white
-                         transition-all text-sm"
+                         transition-all text-sm text-center"
             >
               Sign in
             </Link>
@@ -1120,10 +1120,10 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ───────────────────────────────────────────── */}
-      <footer className="bg-gray-900 text-white py-12 px-6">
+      <footer className="bg-gray-900 text-white py-10 md:py-12 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-4 gap-8 mb-10">
-            <div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-10">
+            <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
                 <Image
                   src="/logo.png"
@@ -1171,7 +1171,7 @@ export default function LandingPage() {
                 )}
               </div>
             </div>
-            <div>
+            <div className="col-span-2 md:col-span-1">
               <h4 className="font-semibold text-sm mb-4">Newsletter</h4>
               <p className="text-gray-400 text-xs mb-3">
                 Get the latest course updates and announcements.
@@ -1193,8 +1193,8 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-6 flex items-center
-                          justify-between">
+          <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center
+                          justify-between gap-3 sm:gap-0 text-center">
             <p className="text-gray-500 text-xs">
               © {new Date().getFullYear()} Blueprint. All rights reserved.
             </p>
@@ -1247,7 +1247,7 @@ function StepCard({
   return (
     <div
       ref={ref}
-      className={`bg-white rounded-2xl p-6 shadow-sm border border-gray-100
+      className={`bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100
                   hover:shadow-md hover:-translate-y-1 transition-all duration-500
                   text-center ${
                     visible

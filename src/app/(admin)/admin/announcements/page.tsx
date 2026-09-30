@@ -149,7 +149,7 @@ export default function AnnouncementsPage() {
 
       {/* Announcements list */}
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
+        <div className="px-4 md:px-6 py-4 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">
             Posted announcements ({announcements.length})
           </h2>
@@ -164,7 +164,7 @@ export default function AnnouncementsPage() {
         ) : (
           <div className="divide-y divide-gray-50">
             {announcements.map((a) => (
-              <div key={a.id} className="px-6 py-4">
+              <div key={a.id} className="px-4 md:px-6 py-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">

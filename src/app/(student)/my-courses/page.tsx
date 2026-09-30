@@ -130,7 +130,7 @@ export default function MyCoursesPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
           {filtered.map((course) => {
             const color = getCourseColor(course.id);
             const progress = course.enrollment.progressPercent ?? 0;

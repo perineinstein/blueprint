@@ -150,7 +150,7 @@ export default function CourseModulesPage() {
       </Link>
 
       {/* Course header */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+      <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 mb-6">
         <h1 className="text-2xl font-semibold text-gray-900 mb-1">
           {course?.title}
         </h1>
@@ -173,7 +173,7 @@ export default function CourseModulesPage() {
               key={module.id}
               href={`/tracks/${trackId}/${courseId}/${module.id}`}
               className="block bg-white rounded-2xl border border-gray-100
-                         hover:border-gray-200 hover:shadow-sm transition-all p-5"
+                         hover:border-gray-200 hover:shadow-sm transition-all p-4 md:p-5"
             >
               <div className="flex items-center gap-4">
                 {/* Module number */}

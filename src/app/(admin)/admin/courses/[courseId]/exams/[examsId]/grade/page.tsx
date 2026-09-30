@@ -172,7 +172,7 @@ export default function GradePage() {
               className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
             >
               {/* Attempt header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-gray-100">
                 <div>
                   <p className="text-sm font-semibold text-gray-900">
                     {attempt.userName}

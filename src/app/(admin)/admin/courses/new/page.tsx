@@ -102,7 +102,7 @@ function handleThumbnailSelect(e: React.ChangeEvent<HTMLInputElement>) {
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-8">
+      <div className="bg-white rounded-2xl border border-gray-100 p-5 md:p-8">
         {error && (
           <div className="mb-6 p-3 rounded-lg bg-red-50 border border-red-100 text-sm text-red-600">
             {error}
@@ -234,7 +234,7 @@ function handleThumbnailSelect(e: React.ChangeEvent<HTMLInputElement>) {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Price (GHS)

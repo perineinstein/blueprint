@@ -306,21 +306,21 @@ export default function ModulePage() {
       </Link>
 
       {/* Module header */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+      <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 mb-6">
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-1">
           {module?.title}
         </h1>
         <p className="text-sm text-gray-500">{course?.title}</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl mb-6">
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl mb-6 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setTab(tab.id)}
             className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3",
+              "flex-1 flex items-center justify-center gap-1.5 py-3 md:py-2.5 px-3 whitespace-nowrap",
               "rounded-lg text-sm font-medium transition-all",
               activeTab === tab.id
                 ? "bg-white text-gray-900 shadow-sm"
@@ -335,7 +335,7 @@ export default function ModulePage() {
 
       {/* ── Overview Tab ─────────────────────────────────── */}
       {activeTab === "overview" && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6 overflow-x-auto">
           {module?.overview ? (
             <div
               className="rich-content"
@@ -372,12 +372,12 @@ export default function ModulePage() {
                           <img
                             src={topic.imageUrl}
                             alt={topic.title}
-                            className="w-14 h-14 rounded-xl object-cover
+                            className="w-12 h-12 md:w-14 md:h-14 rounded-xl object-cover
                                        grayscale"
                           />
                         ) : (
                           <div
-                            className="w-14 h-14 rounded-xl flex items-center
+                            className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center
                                        justify-center bg-gray-200"
                           >
                             <span className="text-gray-400 font-bold text-sm">
@@ -421,11 +421,11 @@ export default function ModulePage() {
                           <img
                             src={topic.imageUrl}
                             alt={topic.title}
-                            className="w-14 h-14 rounded-xl object-cover"
+                            className="w-12 h-12 md:w-14 md:h-14 rounded-xl object-cover"
                           />
                         ) : (
                           <div
-                            className="w-14 h-14 rounded-xl flex items-center
+                            className="w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center
                                        justify-center text-white font-bold text-sm"
                             style={{ backgroundColor: color.hex }}
                           >
@@ -543,15 +543,15 @@ export default function ModulePage() {
                       <Link
                         key={item.quizId}
                         href={`/tracks/${trackId}/${courseId}/${moduleId}/${item.topicId}/quiz/${item.quizId}`}
-                        className="flex items-center justify-between px-5 py-3.5
+                        className="flex items-center justify-between gap-3 px-4 md:px-5 py-3.5
                                    hover:bg-gray-50 transition-colors"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           <ClipboardList
                             size={15}
                             className="text-gray-400 flex-shrink-0"
                           />
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-sm font-medium text-gray-900">
                               {item.quizTitle}
                             </p>
@@ -563,7 +563,7 @@ export default function ModulePage() {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
                           {isGraded && attempt.score !== null ? (
                             <span
                               className={cn(
@@ -615,7 +615,7 @@ export default function ModulePage() {
       {activeTab === "mastery" && (
         <div className="space-y-6">
           {/* Star display */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-8
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 md:p-8
                           text-center">
             <Trophy
               size={36}

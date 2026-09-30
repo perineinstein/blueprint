@@ -176,11 +176,11 @@ export default function StudentDashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left — main content */}
-        <div className="col-span-2 space-y-6">
+        <div className="md:col-span-2 min-w-0 space-y-6">
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2 md:gap-4">
             {[
               {
                 label: "Enrolled",
@@ -203,7 +203,7 @@ export default function StudentDashboardPage() {
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="bg-white rounded-2xl border border-gray-100 p-4"
+                className="bg-white rounded-2xl border border-gray-100 p-3 md:p-4"
               >
                 <p className="text-xs text-gray-500">{stat.label}</p>
                 <p
@@ -318,7 +318,7 @@ export default function StudentDashboardPage() {
                             </div>
                             <Link
                               href={`/tracks/${trackId}/${course.id}`}
-                              className={`px-3 py-2 ${style.light} ${style.text}
+                              className={`px-3 py-2.5 md:py-2 ${style.light} ${style.text}
                                          text-xs font-medium rounded-xl
                                          hover:opacity-80 transition-opacity
                                          whitespace-nowrap flex-shrink-0
@@ -398,7 +398,7 @@ export default function StudentDashboardPage() {
                           </div>
                           <Link
                             href={`/courses/${course.id}/learn`}
-                            className="px-3 py-2 bg-gray-50 text-gray-600
+                            className="px-3 py-2.5 md:py-2 bg-gray-50 text-gray-600
                                        text-xs font-medium rounded-xl
                                        hover:bg-gray-100 transition-colors
                                        whitespace-nowrap flex-shrink-0
@@ -415,7 +415,7 @@ export default function StudentDashboardPage() {
               )}
 
               {/* Quick links */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Link
                   href="/tracks"
                   className="flex items-center gap-3 p-4 bg-white rounded-2xl
@@ -520,7 +520,7 @@ export default function StudentDashboardPage() {
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg
+                  className="flex items-center gap-2 px-3 py-3 md:py-2 rounded-lg
                              hover:bg-gray-50 text-sm text-gray-700
                              transition-colors"
                 >

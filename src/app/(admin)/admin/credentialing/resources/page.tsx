@@ -158,7 +158,7 @@ export default function CredentialingResourcesPage() {
           <span>/</span>
           <span className="text-gray-600">Cookies</span>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">
               Cookies
@@ -344,7 +344,7 @@ export default function CredentialingResourcesPage() {
             {resources.map((resource, index) => (
               <div
                 key={resource.id}
-                className="flex items-center gap-4 px-6 py-4
+                className="flex items-center gap-4 px-4 md:px-6 py-4
                            hover:bg-gray-50 transition-colors"
               >
                 <span className="text-xs text-gray-300 w-5">{index + 1}</span>

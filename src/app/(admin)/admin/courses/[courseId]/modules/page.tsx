@@ -146,7 +146,7 @@ export default function ModulesPage() {
         <span className="text-gray-600">Modules</span>
       </div>
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Modules</h1>
           <p className="text-sm text-gray-500 mt-1">

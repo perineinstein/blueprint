@@ -104,7 +104,7 @@ export default function TrackCoursesPage() {
       {/* Track header */}
       <div
         className={`bg-gradient-to-br ${TRACK_GRADIENTS[trackId]}
-                    rounded-2xl p-8 mb-8 relative overflow-hidden`}
+                    rounded-2xl p-5 md:p-8 mb-6 md:mb-8 relative overflow-hidden`}
       >
         <div
           className="absolute inset-0 opacity-10"
@@ -121,7 +121,7 @@ export default function TrackCoursesPage() {
               {track.name}
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
             {track.name} Courses
           </h1>
           <p className="text-white/70 text-sm">
@@ -141,7 +141,7 @@ export default function TrackCoursesPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {courses.map((course) => {
             const enrollment = enrollments[course.id];
             const isEnrolled =
@@ -204,7 +204,7 @@ export default function TrackCoursesPage() {
                       </span>
                       <Link
                         href={`/courses/${course.id}`}
-                        className="flex items-center gap-1.5 px-4 py-2
+                        className="flex items-center gap-1.5 px-4 py-2.5 md:py-2
                                    bg-blue-50 hover:bg-blue-100 text-blue-700
                                    text-xs font-medium rounded-xl transition-colors"
                       >

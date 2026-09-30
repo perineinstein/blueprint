@@ -396,7 +396,7 @@ export default function AdminCredentialingPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
           {
             label: "Total enrolled",
@@ -520,7 +520,7 @@ export default function AdminCredentialingPage() {
                 {/* Student row */}
                 <button
                   onClick={() => openEnrollment(enrollment)}
-                  className="w-full flex items-center gap-4 px-6 py-4
+                  className="w-full flex items-center gap-4 px-4 md:px-6 py-4
                              hover:bg-gray-50 transition-colors"
                 >
                   {/* Avatar */}

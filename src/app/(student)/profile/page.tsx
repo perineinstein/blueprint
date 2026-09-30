@@ -12,7 +12,7 @@ export default function ProfilePage() {
         <p className="text-sm text-gray-500 mt-1">Your account details</p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-8 max-w-lg">
+      <div className="bg-white rounded-2xl border border-gray-100 p-5 md:p-8 max-w-lg">
         <div className="space-y-4">
           <div>
             <p className="text-xs text-gray-400 mb-1">Full name</p>

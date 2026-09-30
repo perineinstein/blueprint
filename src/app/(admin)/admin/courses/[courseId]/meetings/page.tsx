@@ -173,7 +173,7 @@ export default function MeetingsPage() {
         <span className="text-gray-600">Live Meetings</span>
       </div>
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">
             Live Meetings
@@ -245,7 +245,7 @@ export default function MeetingsPage() {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Date

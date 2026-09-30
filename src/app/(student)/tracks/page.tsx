@@ -35,7 +35,7 @@ export default function TracksPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {TRACKS.map((track) => {
           const visual = TRACK_VISUALS[track.id];
           return (

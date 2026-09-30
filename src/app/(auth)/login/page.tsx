@@ -146,25 +146,25 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center p-4 pt-16 md:pt-4">
 
       {/* Back to home */}
       
-      <a href="/" className="fixed top-6 left-6 flex items-center gap-2 text-white/50 hover:text-white text-sm transition-colors">
+      <a href="/" className="absolute md:fixed top-4 left-4 md:top-6 md:left-6 py-2 md:py-0 flex items-center gap-2 text-white/50 hover:text-white text-sm transition-colors">
         Home 
       </a>
       
 
       {/* Card */}
       <div
-        className="relative w-full max-w-[680px] h-[520px] rounded-3xl
+        className="relative w-full max-w-[680px] md:h-[520px] rounded-3xl
                    overflow-hidden shadow-2xl shadow-black/50"
         style={{ perspective: "1000px" }}
       >
 
         {/* ── Sliding gradient background ─────────────────── */}
         <div
-          className="absolute top-0 bottom-0 w-1/2 z-20 rounded-2xl
+          className="hidden md:block absolute top-0 bottom-0 w-1/2 z-20 rounded-2xl
                      transition-all duration-700 ease-in-out"
           style={{
             background: "linear-gradient(135deg, #3b23c9, #6b50ff, #8b5cf6)",
@@ -187,9 +187,10 @@ export default function AuthPage() {
 
         {/* ── Login form (left side) ───────────────────────── */}
         <div
-          className="absolute top-0 bottom-0 left-0 w-1/2 flex flex-col
-                     items-center justify-center px-8 transition-all
-                     duration-700 ease-in-out z-10"
+          className={`relative md:absolute md:top-0 md:bottom-0 md:left-0 md:w-1/2 ${
+            activeView === "login" ? "flex" : "hidden md:flex"
+          } flex-col items-center justify-center px-6 py-8 md:px-8 md:py-0
+                     transition-all duration-700 ease-in-out z-10`}
           style={{
             opacity: activeView === "login" ? 1 : 0,
             transform:
@@ -244,7 +245,7 @@ export default function AuthPage() {
                     type="button"
                     onClick={() => setShowForgot(true)}
                     className="text-xs text-blue-600 hover:text-blue-700
-                               hover:underline transition-colors"
+                               hover:underline transition-colors py-2 md:py-0"
                   >
                     Forgot password?
                   </button>
@@ -282,6 +283,21 @@ export default function AuthPage() {
                 <GoogleIcon />
                 {googleLoading ? "Connecting..." : "Continue with Google"}
               </button>
+
+              <p className="md:hidden mt-5 text-sm text-gray-500 text-center">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveView("register");
+                    setLoginError("");
+                    setShowForgot(false);
+                  }}
+                  className="text-blue-600 font-semibold hover:underline py-2"
+                >
+                  Sign up
+                </button>
+              </p>
             </>
           ) : (
             // ── Forgot password view ──────────────────────
@@ -354,9 +370,10 @@ export default function AuthPage() {
 
         {/* ── Register form (right side) ───────────────────── */}
         <div
-          className="absolute top-0 bottom-0 right-0 w-1/2 flex flex-col
-                     items-center justify-center px-8 transition-all
-                     duration-700 ease-in-out z-10"
+          className={`relative md:absolute md:top-0 md:bottom-0 md:right-0 md:w-1/2 ${
+            activeView === "register" ? "flex" : "hidden md:flex"
+          } flex-col items-center justify-center px-6 py-8 md:px-8 md:py-0
+                     transition-all duration-700 ease-in-out z-10`}
           style={{
             opacity: activeView === "register" ? 1 : 0,
             transform:
@@ -387,7 +404,7 @@ export default function AuthPage() {
               value={regName}
               onChange={(e) => setRegName(e.target.value)}
               placeholder="Full name"
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200
+              className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200
                          rounded-xl text-sm text-gray-900 placeholder:text-gray-400
                          focus:outline-none focus:ring-2 focus:ring-violet-500
                          focus:border-transparent transition-all"
@@ -398,7 +415,7 @@ export default function AuthPage() {
               value={regEmail}
               onChange={(e) => setRegEmail(e.target.value)}
               placeholder="Email address"
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200
+              className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200
                          rounded-xl text-sm text-gray-900 placeholder:text-gray-400
                          focus:outline-none focus:ring-2 focus:ring-violet-500
                          focus:border-transparent transition-all"
@@ -409,7 +426,7 @@ export default function AuthPage() {
               value={regPassword}
               onChange={(e) => setRegPassword(e.target.value)}
               placeholder="Password"
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200
+              className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200
                          rounded-xl text-sm text-gray-900 placeholder:text-gray-400
                          focus:outline-none focus:ring-2 focus:ring-violet-500
                          focus:border-transparent transition-all"
@@ -420,7 +437,7 @@ export default function AuthPage() {
               value={regConfirm}
               onChange={(e) => setRegConfirm(e.target.value)}
               placeholder="Confirm password"
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200
+              className="w-full px-4 py-3 md:py-2.5 bg-gray-50 border border-gray-200
                          rounded-xl text-sm text-gray-900 placeholder:text-gray-400
                          focus:outline-none focus:ring-2 focus:ring-violet-500
                          focus:border-transparent transition-all"
@@ -450,7 +467,7 @@ export default function AuthPage() {
           <button
             onClick={handleGoogle}
             disabled={googleLoading}
-            className="w-full py-2.5 border border-gray-200 hover:border-gray-300
+            className="w-full py-3 md:py-2.5 border border-gray-200 hover:border-gray-300
                        bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium
                        rounded-xl transition-all duration-200 flex items-center
                        justify-center gap-2 disabled:opacity-50"
@@ -458,11 +475,25 @@ export default function AuthPage() {
             <GoogleIcon />
             {googleLoading ? "Connecting..." : "Continue with Google"}
           </button>
+
+          <p className="md:hidden mt-4 text-sm text-gray-500 text-center">
+            Already have an account?{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveView("login");
+                setRegError("");
+              }}
+              className="text-blue-600 font-semibold hover:underline py-2"
+            >
+              Log in
+            </button>
+          </p>
         </div>
 
         {/* ── Hero panel: Login side (right, slides left) ──── */}
         <div
-          className="absolute top-0 bottom-0 w-1/2 z-30 flex flex-col
+          className="absolute top-0 bottom-0 w-1/2 z-30 hidden md:flex flex-col
                      items-center justify-center gap-5 px-8 text-center
                      transition-all duration-700 ease-in-out"
           style={{
@@ -497,7 +528,7 @@ export default function AuthPage() {
 
         {/* ── Hero panel: Register side (left, slides right) ── */}
         <div
-          className="absolute top-0 bottom-0 w-1/2 z-30 flex flex-col
+          className="absolute top-0 bottom-0 w-1/2 z-30 hidden md:flex flex-col
                      items-center justify-center gap-5 px-8 text-center
                      transition-all duration-700 ease-in-out"
           style={{

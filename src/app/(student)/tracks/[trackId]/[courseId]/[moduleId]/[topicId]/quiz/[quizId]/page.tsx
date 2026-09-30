@@ -494,7 +494,7 @@ export default function TopicQuizPage() {
   if (submitted) {
     return (
       <div className="max-w-2xl mx-auto py-8">
-        <div className="bg-white rounded-2xl border border-gray-100 p-8
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 md:p-8
                         text-center mb-6">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center
                           justify-center mx-auto mb-4">
@@ -533,21 +533,21 @@ export default function TopicQuizPage() {
             </p>
           )}
 
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() =>
                 router.push(
                   `/tracks/${trackId}/${courseId}/${moduleId}/${topicId}`
                 )
               }
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white
+              className="px-5 py-3 md:py-2.5 bg-blue-600 hover:bg-blue-700 text-white
                          text-sm font-medium rounded-xl transition-colors"
             >
               Back to topic
             </button>
             <button
               onClick={() => setShowReview(!showReview)}
-              className="px-5 py-2.5 border border-gray-200 text-gray-700
+              className="px-5 py-3 md:py-2.5 border border-gray-200 text-gray-700
                          text-sm font-medium rounded-xl hover:bg-gray-50
                          transition-colors"
             >
@@ -617,13 +617,13 @@ export default function TopicQuizPage() {
                       src={question.imageUrl}
                       alt="Question"
                       className="max-h-40 rounded-lg border border-gray-100
-                                 mb-3 ml-10"
+                                 mb-3 md:ml-10"
                     />
                   )}
 
                   {/* MCQ review */}
                   {question.type !== "subjective" && question.options && (
-                    <div className="ml-10 space-y-2 mb-3">
+                    <div className="md:ml-10 space-y-2 mb-3">
                       {(["A", "B", "C", "D"] as const).map((opt) => {
                         const isOpt = question.correctAnswers?.includes(opt);
                         const studentSelected = Array.isArray(studentAnswer)
@@ -661,7 +661,7 @@ export default function TopicQuizPage() {
 
                   {/* Subjective answer */}
                   {question.type === "subjective" && (
-                    <div className="ml-10 mb-3">
+                    <div className="md:ml-10 mb-3">
                       <p className="text-xs text-gray-400 mb-1">Your answer:</p>
                       <div className="p-3 bg-gray-50 rounded-xl text-sm
                                       text-gray-700">
@@ -672,7 +672,7 @@ export default function TopicQuizPage() {
 
                   {/* Explanation */}
                   {question.explanation && (
-                    <div className="ml-10 p-4 bg-amber-50 border border-amber-100
+                    <div className="md:ml-10 p-4 bg-amber-50 border border-amber-100
                                     rounded-xl">
                       <p className="text-xs font-semibold text-amber-800 mb-1">
                         Explanation
@@ -712,11 +712,11 @@ export default function TopicQuizPage() {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Sticky header */}
-      <div className="sticky top-0 z-10 bg-gray-50 pb-4 mb-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-4
-                        flex items-center justify-between">
-          <div>
-            <h1 className="text-sm font-semibold text-gray-900">
+      <div className="sticky top-14 md:top-0 z-10 bg-gray-50 pb-4 mb-4 md:mb-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-3 md:p-4
+                        flex flex-wrap items-center justify-between gap-2 md:gap-3">
+          <div className="min-w-0">
+            <h1 className="text-sm font-semibold text-gray-900 truncate">
               {quiz.title}
             </h1>
             <p className="text-xs text-gray-400 mt-0.5">
@@ -725,11 +725,11 @@ export default function TopicQuizPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             {/* Timer */}
             <div
               className={cn(
-                "flex items-center gap-1.5 px-4 py-2 rounded-xl font-mono",
+                "flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-xl font-mono",
                 "text-sm font-semibold",
                 isLowTime
                   ? "bg-red-50 text-red-600 animate-pulse"
@@ -743,7 +743,7 @@ export default function TopicQuizPage() {
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700
+              className="px-4 py-3 md:py-2 bg-blue-600 hover:bg-blue-700
                          disabled:bg-blue-400 text-white text-sm font-medium
                          rounded-xl transition-colors"
             >
@@ -766,7 +766,7 @@ export default function TopicQuizPage() {
 
       {/* Case scenario — shown once at top */}
       {quiz.type === "case_study" && quiz.caseScenario && (
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 mb-6">
+        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 md:p-6 mb-6">
           <p className="text-xs font-semibold text-blue-800 mb-3 uppercase
                         tracking-wide">
             Case Scenario
@@ -780,13 +780,13 @@ export default function TopicQuizPage() {
 
       {/* Page number buttons */}
       {totalPages > 1 && (
-        <div className="flex items-center gap-1 mb-4 flex-wrap">
+        <div className="flex items-center gap-1.5 md:gap-1 mb-4 flex-wrap">
           {Array.from({ length: totalPages }).map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentPage(i)}
               className={cn(
-                "w-8 h-8 rounded-lg text-xs font-medium transition-colors",
+                "w-10 h-10 md:w-8 md:h-8 rounded-lg text-xs font-medium transition-colors",
                 i === currentPage
                   ? "text-white"
                   : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"
@@ -813,7 +813,7 @@ export default function TopicQuizPage() {
           return (
             <div
               key={question.id}
-              className="bg-white rounded-2xl border border-gray-100 p-6"
+              className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-start gap-3">
@@ -847,13 +847,13 @@ export default function TopicQuizPage() {
                   src={question.imageUrl}
                   alt="Question diagram"
                   className="max-h-48 rounded-xl border border-gray-100
-                             mb-4 ml-10"
+                             mb-4 md:ml-10"
                 />
               )}
 
               {/* MCQ options */}
               {question.type !== "subjective" && question.options && (
-                <div className="space-y-2 ml-10">
+                <div className="space-y-2 md:ml-10">
                   {(["A", "B", "C", "D"] as const).map((opt) => {
                     const selected = isMulti
                       ? Array.isArray(studentAnswer) &&
@@ -868,7 +868,7 @@ export default function TopicQuizPage() {
                           handleAnswer(question.id, opt, isMulti)
                         }
                         className={cn(
-                          "w-full text-left px-4 py-3 rounded-xl border",
+                          "w-full text-left px-4 py-3 min-h-[48px] md:min-h-0 rounded-xl border",
                           "text-sm transition-colors flex items-center gap-3",
                           selected
                             ? "border-blue-500 bg-blue-50 text-blue-700"
@@ -915,7 +915,7 @@ export default function TopicQuizPage() {
 
               {/* Subjective */}
               {question.type === "subjective" && (
-                <div className="ml-10">
+                <div className="md:ml-10">
                   <textarea
                     value={(studentAnswer as string) ?? ""}
                     onChange={(e) =>
@@ -935,7 +935,7 @@ export default function TopicQuizPage() {
               {(Array.isArray(studentAnswer)
                 ? studentAnswer.length > 0
                 : !!studentAnswer) && (
-                <div className="ml-10 mt-2 flex items-center gap-1 text-xs
+                <div className="md:ml-10 mt-2 flex items-center gap-1 text-xs
                                 text-green-600">
                   <CheckCircle size={12} />
                   Answered
@@ -952,7 +952,7 @@ export default function TopicQuizPage() {
           <button
             onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
             disabled={currentPage === 0}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600
+            className="flex items-center gap-1.5 px-4 py-3 md:py-2 text-sm text-gray-600
                        hover:text-gray-900 disabled:opacity-30
                        disabled:cursor-not-allowed transition-colors"
           >
@@ -964,7 +964,7 @@ export default function TopicQuizPage() {
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700
+              className="px-6 py-3 md:py-2.5 bg-blue-600 hover:bg-blue-700
                          disabled:bg-blue-400 text-white text-sm font-medium
                          rounded-xl transition-colors"
             >
@@ -975,7 +975,7 @@ export default function TopicQuizPage() {
               onClick={() =>
                 setCurrentPage((p) => Math.min(totalPages - 1, p + 1))
               }
-              className="flex items-center gap-1.5 px-4 py-2 text-sm
+              className="flex items-center gap-1.5 px-4 py-3 md:py-2 text-sm
                          text-gray-600 hover:text-gray-900 transition-colors"
             >
               Next

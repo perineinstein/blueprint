@@ -35,6 +35,8 @@ import {
   ClipboardList,
   Lock,
   ChevronRight,
+  List,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -58,6 +60,8 @@ export default function TopicPage() {
   const [loading, setLoading] = useState(true);
   const [activeMaterial, setActiveMaterial] = useState<Material | null>(null);
   const [markingDone, setMarkingDone] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [topicPos, setTopicPos] = useState<{ index: number; total: number } | null>(null);
 
   const basePath = `courses/${courseId}/modules/${moduleId}/topics/${topicId}`;
 
@@ -99,6 +103,7 @@ export default function TopicPage() {
         }
       }
 
+      setTopicPos({ index: topicIndex + 1, total: allTopics.length });
       setEnrollment(e);
       setCompletedMaterials(e.topicMaterialsCompleted?.[topicId] ?? []);
       setPassedQuizzes(e.topicQuizzesPassed?.[topicId] ?? []);
@@ -223,23 +228,76 @@ export default function TopicPage() {
   const topicComplete = allMaterialsDone && allQuizzesDone;
 
   return (
-    <div className="flex gap-6 h-[calc(100vh-5rem)]">
-      {/* ── Left sidebar ─────────────────────────────────── */}
-      <div className="w-64 flex-shrink-0 bg-white rounded-2xl border
-                      border-gray-100 flex flex-col overflow-hidden">
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-[calc(100vh-5rem)]">
+      {/* ── Mobile topic bar ─────────────────────────────── */}
+      <div
+        className="lg:hidden flex items-center justify-between gap-3 bg-white
+                   rounded-2xl border border-gray-100 p-3"
+        style={{ borderTopColor: color.hex, borderTopWidth: 3 }}
+      >
+        <div className="min-w-0">
+          <p className="text-xs text-gray-400">
+            {topicPos
+              ? `Topic ${topicPos.index} of ${topicPos.total}`
+              : module?.title}
+          </p>
+          <p className="text-sm font-semibold text-gray-900 truncate">
+            {topic.title}
+          </p>
+        </div>
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="flex items-center gap-1.5 px-3 min-h-[44px] rounded-xl
+                     bg-blue-50 text-blue-700 text-sm font-medium
+                     flex-shrink-0 hover:bg-blue-100 transition-colors"
+        >
+          <List size={16} />
+          Materials
+        </button>
+      </div>
+
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* ── Left sidebar (drawer below lg) ───────────────── */}
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-[85%] max-w-xs transition-transform duration-300",
+          "lg:static lg:z-auto lg:w-64 lg:max-w-none lg:translate-x-0 lg:transition-none",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          "flex-shrink-0 bg-white rounded-none lg:rounded-2xl border",
+          "border-gray-100 flex flex-col overflow-hidden"
+        )}
+      >
         {/* Header */}
         <div
           className="p-4 border-b border-gray-100"
           style={{ borderTopColor: color.hex, borderTopWidth: 3 }}
         >
-          <Link
-            href={`/tracks/${trackId}/${courseId}/${moduleId}?tab=topics`}
-            className="flex items-center gap-1.5 text-xs text-gray-400
-                       hover:text-gray-600 mb-3 transition-colors"
-          >
-            <ChevronLeft size={13} />
-            Back to topics
-          </Link>
+          <div className="flex items-center justify-between mb-3">
+            <Link
+              href={`/tracks/${trackId}/${courseId}/${moduleId}?tab=topics`}
+              className="flex items-center gap-1.5 text-xs text-gray-400
+                         hover:text-gray-600 transition-colors py-2 lg:py-0"
+            >
+              <ChevronLeft size={13} />
+              Back to topics
+            </Link>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close materials"
+              className="lg:hidden w-11 h-11 -mr-2 -my-2 flex items-center
+                         justify-center rounded-lg text-gray-500
+                         hover:bg-gray-100 transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
           <div className="flex items-center gap-2">
             {topic.imageUrl ? (
@@ -265,9 +323,12 @@ export default function TopicPage() {
           {/* Lesson content link */}
           {topic.lessonContent && (
             <button
-              onClick={() => setActiveMaterial(null)}
+              onClick={() => {
+                setActiveMaterial(null);
+                setSidebarOpen(false);
+              }}
               className={cn(
-                "w-full text-left px-4 py-3 border-b border-gray-50",
+                "w-full text-left px-4 py-3.5 lg:py-3 border-b border-gray-50",
                 "flex items-center gap-2.5 text-xs transition-colors",
                 activeMaterial === null
                   ? "bg-blue-50 text-blue-700 font-medium"
@@ -286,9 +347,12 @@ export default function TopicPage() {
             return (
               <button
                 key={mat.id}
-                onClick={() => setActiveMaterial(mat)}
+                onClick={() => {
+                  setActiveMaterial(mat);
+                  setSidebarOpen(false);
+                }}
                 className={cn(
-                  "w-full text-left px-4 py-3 border-b border-gray-50",
+                  "w-full text-left px-4 py-3.5 lg:py-3 border-b border-gray-50",
                   "flex items-start gap-2.5 transition-colors",
                   isActive
                     ? "bg-blue-50"
@@ -341,7 +405,7 @@ export default function TopicPage() {
               <Link
                 key={quiz.id}
                 href={`/tracks/${trackId}/${courseId}/${moduleId}/${topicId}/quiz/${quiz.id}`}
-                className="flex items-center gap-2.5 px-4 py-3 border-b
+                className="flex items-center gap-2.5 px-4 py-3.5 lg:py-3 border-b
                            border-gray-50 hover:bg-gray-50 transition-colors"
               >
                 <span className="flex-shrink-0">
@@ -387,7 +451,7 @@ export default function TopicPage() {
         {activeMaterial === null && topic.lessonContent ? (
           // Lesson content
           <div className="flex-1 bg-white rounded-2xl border border-gray-100
-                          p-8 overflow-y-auto">
+                          p-4 md:p-8 overflow-y-auto">
             <div className="flex items-center gap-3 mb-6 pb-4 border-b
                             border-gray-100">
               {topic.imageUrl ? (
@@ -436,12 +500,12 @@ export default function TopicPage() {
                   <div className="flex-1">
                     <iframe
                       src={activeMaterial.fileUrl}
-                      className="w-full h-full min-h-[500px]"
+                      className="w-full h-full min-h-[400px] md:min-h-[500px]"
                       title={activeMaterial.title}
                     />
                   </div>
                   <div className="p-4 border-t border-gray-100 flex items-center
-                                  justify-between">
+                                  justify-between gap-3">
                     <h2 className="text-sm font-semibold text-gray-900">
                       {activeMaterial.title}
                     </h2>
@@ -460,7 +524,7 @@ export default function TopicPage() {
 
             {/* Mark done bar */}
             <div className="bg-white rounded-2xl border border-gray-100 p-4
-                            flex items-center justify-between">
+                            flex flex-wrap items-center justify-between gap-3">
               {completedMaterials.includes(activeMaterial!.id) ? (
                 <span className="flex items-center gap-2 text-sm text-green-600
                                  font-medium">
@@ -471,7 +535,7 @@ export default function TopicPage() {
                 <button
                   onClick={() => markMaterialDone(activeMaterial!.id)}
                   disabled={markingDone === activeMaterial!.id}
-                  className="flex items-center gap-2 px-5 py-2 bg-green-600
+                  className="flex items-center gap-2 px-5 py-3 md:py-2 bg-green-600
                              hover:bg-green-700 disabled:bg-green-400 text-white
                              text-sm font-medium rounded-xl transition-colors"
                 >
@@ -492,7 +556,7 @@ export default function TopicPage() {
                 return (
                   <button
                     onClick={() => setActiveMaterial(next)}
-                    className="flex items-center gap-1.5 text-sm text-gray-500
+                    className="flex items-center gap-1.5 text-sm text-gray-500 py-3 md:py-0
                               hover:text-gray-900 transition-colors"
                   >
                     Next
