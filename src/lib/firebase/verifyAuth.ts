@@ -1,17 +1,38 @@
-import { adminAuth } from "@/lib/firebase/admin";
 import { NextRequest } from "next/server";
+import { adminDb } from "@/lib/firebase/admin";
 
 export interface VerifiedUser {
   uid: string;
-  email: string | undefined;
+  email?: string;
   role?: string;
+}
+
+async function verifyFirebaseToken(idToken: string): Promise<{ uid: string; email?: string } | null> {
+  try {
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const user = data.users?.[0];
+    if (!user) return null;
+
+    return { uid: user.localId, email: user.email };
+  } catch {
+    return null;
+  }
 }
 
 export async function verifyAuthToken(
   request: NextRequest
 ): Promise<VerifiedUser | null> {
   try {
-    // Get token from Authorization header or session cookie
     const authHeader = request.headers.get("Authorization");
     const sessionCookie = request.cookies.get("session")?.value;
 
@@ -21,11 +42,10 @@ export async function verifyAuthToken(
 
     if (!token) return null;
 
-    const decoded = await adminAuth.verifyIdToken(token);
-    return {
-      uid: decoded.uid,
-      email: decoded.email,
-    };
+    const verified = await verifyFirebaseToken(token);
+    if (!verified) return null;
+
+    return { uid: verified.uid, email: verified.email };
   } catch {
     return null;
   }
@@ -34,13 +54,14 @@ export async function verifyAuthToken(
 export async function verifyAdminToken(
   request: NextRequest
 ): Promise<VerifiedUser | null> {
-  const { adminDb } = await import("@/lib/firebase/admin");
-
   const user = await verifyAuthToken(request);
   if (!user) return null;
 
-  const userDoc = await adminDb.collection("users").doc(user.uid).get();
-  if (!userDoc.exists || userDoc.data()?.role !== "admin") return null;
-
-  return { ...user, role: "admin" };
+  try {
+    const userDoc = await adminDb.collection("users").doc(user.uid).get();
+    if (!userDoc.exists || userDoc.data()?.role !== "admin") return null;
+    return { ...user, role: "admin" };
+  } catch {
+    return null;
+  }
 }
