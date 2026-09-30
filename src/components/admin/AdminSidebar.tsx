@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { cn } from "@/lib/utils/cn";
@@ -363,18 +364,12 @@ export default function AdminSidebar() {
 
 function BlueprintIcon() {
   return (
-    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-      <rect width="32" height="32" rx="8" fill="#2563eb" />
-      <rect x="5" y="12" width="2.5" height="8" rx="1.25"
-        fill="white" opacity="0.4" />
-      <rect x="9.75" y="9" width="2.5" height="14" rx="1.25"
-        fill="white" opacity="0.65" />
-      <rect x="14.75" y="6" width="2.5" height="20" rx="1.25"
-        fill="white" opacity="0.95" />
-      <rect x="19.75" y="9" width="2.5" height="14" rx="1.25"
-        fill="white" opacity="0.65" />
-      <rect x="24.5" y="12" width="2.5" height="8" rx="1.25"
-        fill="white" opacity="0.4" />
-    </svg>
+    <Image
+      src="/logo.png"
+      alt="Blueprint"
+      width={32}
+      height={32}
+      className="w-8 h-8 object-contain flex-shrink-0"
+    />
   );
 }

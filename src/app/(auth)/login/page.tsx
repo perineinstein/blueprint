@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase/client";
+import { GraduationCap, Hand, Mail } from "lucide-react";
 
 export default function AuthPage() {
   const { login, register } = useAuth();
@@ -85,9 +86,14 @@ export default function AuthPage() {
     setForgotError("");
     setForgotLoading(true);
     try {
-      await sendPasswordResetEmail(auth, forgotEmail);
+      const actionCodeSettings = {
+        url: `${process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin}/login`,
+        handleCodeInApp: false,
+      };
+      await sendPasswordResetEmail(auth, forgotEmail.trim(), actionCodeSettings);
       setForgotSent(true);
     } catch (err: any) {
+      console.error("Password reset error:", err?.code, err?.message);
       setForgotError(firebaseError(err.code));
     } finally {
       setForgotLoading(false);
@@ -302,7 +308,7 @@ export default function AuthPage() {
               {forgotSent ? (
                 <div className="w-full p-4 bg-green-50 border border-green-100
                                rounded-xl text-center">
-                  <div className="text-2xl mb-2">📧</div>
+                  <Mail size={28} className="mx-auto mb-2 text-green-600" />
                   <p className="text-sm font-medium text-green-700">
                     Reset link sent!
                   </p>
@@ -467,7 +473,7 @@ export default function AuthPage() {
         >
           <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center
                           justify-center mb-2">
-            <span className="text-2xl">👋</span>
+            <Hand size={24} className="text-white" />
           </div>
           <h2 className="text-xl font-bold text-white">Hello there!</h2>
           <p className="text-sm text-white/70 leading-relaxed">
@@ -504,7 +510,7 @@ export default function AuthPage() {
         >
           <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center
                           justify-center mb-2">
-            <span className="text-2xl">🎓</span>
+            <GraduationCap size={24} className="text-white" />
           </div>
           <h2 className="text-xl font-bold text-white">Welcome back!</h2>
           <p className="text-sm text-white/70 leading-relaxed">
@@ -555,13 +561,17 @@ function GoogleIcon() {
 
 function firebaseError(code: string): string {
   const errors: Record<string, string> = {
-    "auth/user-not-found": "No account found with this email.",
+    "auth/user-not-found": "No account found with this email address.",
     "auth/wrong-password": "Incorrect password.",
     "auth/invalid-credential": "Incorrect email or password.",
     "auth/invalid-email": "Please enter a valid email address.",
     "auth/email-already-in-use": "An account with this email already exists.",
     "auth/weak-password": "Password must be at least 6 characters.",
-    "auth/too-many-requests": "Too many attempts. Please try again later.",
+    "auth/too-many-requests": "Too many requests. Please try again later.",
+    "auth/unauthorized-continue-uri":
+      "This domain is not authorized for password reset. Contact support.",
+    "auth/invalid-continue-uri":
+      "Password reset is misconfigured. Contact support.",
     "auth/network-request-failed": "Network error. Check your connection.",
     "auth/popup-closed-by-user": "Google sign-in was cancelled.",
     "auth/cancelled-popup-request": "Only one popup allowed at a time.",
