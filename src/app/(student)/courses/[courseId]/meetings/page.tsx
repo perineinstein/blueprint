@@ -219,7 +219,7 @@ export default function StudentMeetingsPage() {
                           </div>
                         </div>
 
-                        
+                        <a
                           href={meeting.zoomLink}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -230,7 +230,7 @@ export default function StudentMeetingsPage() {
                                          ? "bg-green-600 hover:bg-green-700 text-white"
                                          : "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200"
                                      }`}
-                        <a>
+                        >
                           <ExternalLink size={12} />
                           {live ? "Join now" : "Join"}
                         </a>
