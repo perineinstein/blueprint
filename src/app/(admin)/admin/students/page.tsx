@@ -5,8 +5,7 @@ import {
   collection,
   query,
   where,
-  getDocs,
-  orderBy,
+  getDocs
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { AppUser } from "@/types";

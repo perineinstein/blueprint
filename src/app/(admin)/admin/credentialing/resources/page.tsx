@@ -9,8 +9,7 @@ import {
   doc,
   orderBy,
   query,
-  serverTimestamp,
-  updateDoc,
+  serverTimestamp
 } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase/client";
@@ -21,10 +20,9 @@ import {
   Trash2,
   FileText,
   Link as LinkIcon,
-  Upload,
   Check,
   X,
-  ShieldCheck,
+  ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
 

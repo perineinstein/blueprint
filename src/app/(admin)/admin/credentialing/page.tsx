@@ -29,9 +29,8 @@ import {
   ShieldCheck,
   Save,
   Users,
-  ChevronRight,
   Search,
-  Banknote,
+  Banknote
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { formatPrice } from "@/lib/utils/formatting";

@@ -63,7 +63,8 @@ export async function POST(request: NextRequest) {
 
     if (
       !enrollment.exists ||
-      enrollment.data()?.status !== "active"
+      enrollment.data()?.status !== "active" ||
+      enrollment.data()?.expiryDate?.toDate() < new Date()
     ) {
       return NextResponse.json({ error: "Not enrolled" }, { status: 403 });
     }

@@ -30,9 +30,7 @@ import {
   Trash2,
   Video,
   FileText,
-  Upload,
-  Check,
-  X,
+  Check
 } from "lucide-react";
 import { TOPIC_COLORS } from "@/types";
 import { ClipboardList } from "lucide-react";

@@ -9,10 +9,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
-  serverTimestamp,
-  updateDoc,
-  orderBy,
-  query,
+  serverTimestamp
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import {
@@ -36,10 +33,9 @@ import {
   Check,
   X,
   CheckSquare,
-  Square,
   AlignLeft,
   ChevronDown,
-  ChevronUp,
+  ChevronUp
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";

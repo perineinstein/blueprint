@@ -25,7 +25,12 @@ export async function POST(request: NextRequest) {
     .update(body)
     .digest("hex");
 
-  if (hash !== signature) {
+  const validSignature =
+    !!signature &&
+    signature.length === hash.length &&
+    crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
+
+  if (!validSignature) {
     console.error("Invalid Paystack signature");
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }

@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { Course, TrackId } from "@/types";
-import { formatPrice } from "@/lib/utils/formatting";
+import { } from "@/lib/utils/formatting";
 import Link from "next/link";
 import { BookOpen, Video } from "lucide-react";
 

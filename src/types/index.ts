@@ -110,11 +110,6 @@ export interface Exam {
   createdAt: Timestamp;
 }
 
-// Client-safe exam (no correct answers)
-export type ExamForStudent = Omit<Exam, "questions"> & {
-  questions: Omit<Question, "correctAnswer">[];
-};
-
 // ─── Attempts ────────────────────────────────────────────────
 export type AttemptStatus = "in_progress" | "submitted" | "graded";
 
@@ -287,13 +282,6 @@ export function getMasteryStars(percentScore: number): number {
 }
 
 // ─── Extended enrollment progress ─────────────────────────
-// Add to existing Enrollment:
-export interface TopicProgress {
-  completedMaterials: string[];   // materialIds
-  passedQuizzes: string[];        // quizIds
-  isComplete: boolean;
-}
-
 // ─── Credentialing ────────────────────────────────────────
 export const CREDENTIALING_PHASES = [
   { index: 0,  name: "Candidate Assessment" },
