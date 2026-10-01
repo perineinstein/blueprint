@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { Course, Material, Enrollment } from "@/types";
+import { Course, Material, Enrollment, TRACKS } from "@/types";
 import { formatPrice } from "@/lib/utils/formatting";
 import Link from "next/link";
 import { getCourseLearnLink } from "@/lib/utils/courseLink";
@@ -140,6 +140,20 @@ export default function CourseDetailPage() {
           {course.title}
         </h1>
         <p className="text-sm text-gray-500 mb-6">{course.description}</p>
+
+        {course.trackId && (
+          <p className="text-xs text-gray-500 mb-6">
+            This course is part of the{" "}
+            <Link
+              href={`/tracks/${course.trackId}`}
+              className="font-medium text-blue-600 hover:underline"
+            >
+              {TRACKS.find((t) => t.id === course.trackId)?.name ??
+                course.trackId.toUpperCase()}{" "}
+              track
+            </Link>
+          </p>
+        )}
 
         <div className="flex items-center gap-6 mb-6">
           <div>

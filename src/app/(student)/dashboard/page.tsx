@@ -38,6 +38,12 @@ interface TrackSummary {
   courses: EnrolledCourse[];
 }
 
+interface TrackCard {
+  trackId: TrackId;
+  enrolled: number;
+  published: number;
+}
+
 type TrackStyleMap = Record<TrackId, { gradient: string; light: string; text: string }>;
 
 const TRACK_STYLES: TrackStyleMap = {
@@ -59,6 +65,7 @@ export default function StudentDashboardPage() {
   const [untrackedCourses, setUntrackedCourses] = useState<EnrolledCourse[]>(
     []
   );
+  const [trackCards, setTrackCards] = useState<TrackCard[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -136,6 +143,24 @@ export default function StudentDashboardPage() {
           (t) => byTrack[t.id].length > 0
         ).map((t) => ({ trackId: t.id, courses: byTrack[t.id] }));
 
+        // Published courses per track, so a track card shows even before
+        // the student has enrolled in anything there.
+        const publishedSnap = await getDocs(
+          query(collection(db, "courses"), where("published", "==", true))
+        ).catch(() => null);
+        const publishedByTrack: Record<TrackId, number> = { nclex: 0, ielts: 0 };
+        publishedSnap?.docs.forEach((d) => {
+          const t = d.data().trackId;
+          if (t === "nclex" || t === "ielts") publishedByTrack[t as TrackId]++;
+        });
+        setTrackCards(
+          TRACKS.map((t) => ({
+            trackId: t.id,
+            enrolled: byTrack[t.id].length,
+            published: publishedByTrack[t.id],
+          })).filter((c) => c.enrolled > 0 || c.published > 0)
+        );
+
         setTrackSummaries(summaries);
         setUntrackedCourses(untracked);
 
@@ -189,6 +214,56 @@ export default function StudentDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left — main content */}
         <div className="md:col-span-2 min-w-0 space-y-6">
+          {/* Your Tracks */}
+          {trackCards.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900 mb-3">
+                Your Tracks
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {trackCards.map(({ trackId, enrolled }) => {
+                  const track = TRACKS.find((t) => t.id === trackId)!;
+                  const style = TRACK_STYLES[trackId];
+                  return (
+                    <Link
+                      key={trackId}
+                      href={`/tracks/${trackId}`}
+                      className={`group relative overflow-hidden rounded-2xl p-6
+                                  bg-gradient-to-br ${style.gradient} text-white
+                                  hover:shadow-lg transition-shadow`}
+                    >
+                      <div
+                        className="absolute inset-0 opacity-10"
+                        style={{
+                          backgroundImage:
+                            "radial-gradient(circle, white 1px, transparent 1px)",
+                          backgroundSize: "20px 20px",
+                        }}
+                      />
+                      <div className="relative z-10">
+                        <BookOpen size={22} className="text-white/80 mb-3" />
+                        <h3 className="text-2xl font-bold">{track.name}</h3>
+                        <p className="text-sm text-white/80 mt-1">
+                          {enrolled > 0
+                            ? `${enrolled} course${
+                                enrolled !== 1 ? "s" : ""
+                              } enrolled`
+                            : "Browse courses"}
+                        </p>
+                        <span className="inline-flex items-center gap-1.5 mt-5 px-4 py-2
+                                         bg-white/15 group-hover:bg-white/25 rounded-xl
+                                         text-sm font-medium transition-colors">
+                          Enter track
+                          <ArrowRight size={14} />
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-3 gap-2 md:gap-4">
             {[

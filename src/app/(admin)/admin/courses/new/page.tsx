@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { TRACKS, TrackId, getAdminTrack } from "@/types";
+import { TrackId, getAdminTrack } from "@/types";
+import TrackSelect, { TrackChoice } from "@/components/admin/TrackSelect";
 
 
 export default function NewCoursePage() {
@@ -16,8 +17,8 @@ export default function NewCoursePage() {
   const { appUser } = useAuth();
   // Track admins can only create courses in their own track.
   const lockedTrack = appUser ? getAdminTrack(appUser.role) : null;
-  const [selectedTrackId, setTrackId] = useState<TrackId | null>(null);
-  const trackId: TrackId | null = lockedTrack ?? selectedTrackId;
+  const [selectedTrack, setSelectedTrack] = useState<TrackChoice>(undefined);
+  const trackChoice: TrackChoice = lockedTrack ?? selectedTrack;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -44,6 +45,12 @@ function handleThumbnailSelect(e: React.ChangeEvent<HTMLInputElement>) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    // trackId is saved as "nclex" | "ielts" | null — never undefined.
+    if (trackChoice === undefined) {
+      setError("Please choose which track this course belongs to.");
+      return;
+    }
+    const trackId: TrackId | null = trackChoice;
     setLoading(true);
 
     try {
@@ -129,54 +136,11 @@ function handleThumbnailSelect(e: React.ChangeEvent<HTMLInputElement>) {
             />
           </div>
 
-          {lockedTrack ? (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Track
-              </label>
-              <p className="text-sm text-gray-900">
-                {TRACKS.find((t) => t.id === lockedTrack)?.name ?? lockedTrack}
-              </p>
-            </div>
-          ) : (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Track (optional)
-            </label>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setTrackId(null)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium border
-                          transition-colors ${
-                            trackId === null
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-gray-200 text-gray-500 hover:bg-gray-50"
-                          }`}
-              >
-                No track
-              </button>
-              {TRACKS.map((track) => (
-                <button
-                  key={track.id}
-                  type="button"
-                  onClick={() => setTrackId(track.id)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium border
-                            transition-colors ${
-                              trackId === track.id
-                                ? "border-blue-500 bg-blue-50 text-blue-700"
-                                : "border-gray-200 text-gray-500 hover:bg-gray-50"
-                            }`}
-                >
-                  {track.name}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              Assign to NCLEX or IELTS for the new learning structure
-            </p>
-          </div>
-          )}
+          <TrackSelect
+            value={trackChoice}
+            onChange={setSelectedTrack}
+            lockedTrack={lockedTrack}
+          />
 
           {/* Thumbnail upload */}
           <div>

@@ -4,13 +4,17 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
-import { Course, TrackId } from "@/types";
+import { Course, TrackId, getAdminTrack } from "@/types";
+import { useAuth } from "@/lib/hooks/useAuth";
+import TrackSelect from "@/components/admin/TrackSelect";
 import { } from "@/lib/utils/formatting";
 import Link from "next/link";
 import { BookOpen, Video } from "lucide-react";
 
 export default function EditCoursePage() {
   const router = useRouter();
+  const { appUser } = useAuth();
+  const lockedTrack = appUser ? getAdminTrack(appUser.role) : null;
   const { courseId } = useParams() as { courseId: string };
 
   const [course, setCourse] = useState<Course | null>(null);
@@ -58,7 +62,7 @@ export default function EditCoursePage() {
         totalDuration,
         accessDurationDays: parseInt(accessDuration),
         updatedAt: serverTimestamp(),
-        trackId: trackId,
+        trackId: lockedTrack ?? trackId,
       });
       setSaved(true);
     } catch (err) {
@@ -205,6 +209,12 @@ export default function EditCoursePage() {
               </p>
             </div>
           </div>
+
+          <TrackSelect
+            value={lockedTrack ?? trackId}
+            onChange={setTrackId}
+            lockedTrack={lockedTrack}
+          />
 
           <div className="flex items-center gap-3 pt-2">
             <button
