@@ -1,0 +1,219 @@
+rules_version = '2';
+
+// Blueprint LMS — Firestore security rules (track-based admin roles).
+//
+// Roles stored in users/{uid}.role:
+//   student | admin_nclex | admin_ielts | super_admin | admin (legacy = super_admin)
+//
+// IMPORTANT: this file was written from how the client code uses Firestore, not
+// from the rules that were live before. Diff it against the current rules in the
+// Firebase Console before publishing, and test in the Rules Playground.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ───────────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function userPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function getUserRole() {
+      return isAuth() && exists(userPath()) ? get(userPath()).data.role : 'none';
+    }
+
+    function isAnyAdmin() {
+      let role = getUserRole();
+      return role == 'admin' || role == 'super_admin' ||
+             role == 'admin_nclex' || role == 'admin_ielts';
+    }
+
+    function isSuperAdmin() {
+      let role = getUserRole();
+      return role == 'admin' || role == 'super_admin';
+    }
+
+    // trackId may be null (legacy course) — only super admins manage those.
+    function isTrackAdmin(trackId) {
+      let role = getUserRole();
+      return role == 'admin' || role == 'super_admin' ||
+             (role == 'admin_nclex' && trackId == 'nclex') ||
+             (role == 'admin_ielts' && trackId == 'ielts');
+    }
+
+    // Credentialing belongs to the NCLEX track.
+    function isCredentialingAdmin() {
+      let role = getUserRole();
+      return role == 'admin' || role == 'super_admin' || role == 'admin_nclex';
+    }
+
+    function enrollmentPath(courseId) {
+      return /databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + courseId);
+    }
+
+    function hasActiveEnrollment(courseId) {
+      return isAuth() && exists(enrollmentPath(courseId)) &&
+             get(enrollmentPath(courseId)).data.status == 'active' &&
+             get(enrollmentPath(courseId)).data.expiryDate > request.time;
+    }
+
+    function courseTrack(courseId) {
+      return get(/databases/$(database)/documents/courses/$(courseId)).data.get('trackId', null);
+    }
+
+    // ── Users ─────────────────────────────────────────────────
+    match /users/{userId} {
+      allow get: if isAuth() && (request.auth.uid == userId || isAnyAdmin());
+      allow list: if isAnyAdmin();
+      // Self-registration always creates a student.
+      allow create: if isAuth() && request.auth.uid == userId &&
+                       request.resource.data.role == 'student';
+      // Users can edit their profile but never their own role.
+      // Role changes go through /api/admin/users/role (Admin SDK).
+      allow update: if isAuth() && request.auth.uid == userId &&
+                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']);
+      allow delete: if false;
+    }
+
+    // ── Courses and everything nested under them ──────────────
+    match /courses/{courseId} {
+      allow get: if resource.data.published == true || isAnyAdmin() ||
+                    hasActiveEnrollment(courseId);
+      // The catalogue query filters on published == true.
+      allow list: if isAuth() && (resource.data.published == true || isAnyAdmin());
+
+      allow create: if isTrackAdmin(request.resource.data.get('trackId', null));
+      // A track admin can only edit their own track's courses and cannot
+      // move a course into another track.
+      allow update: if isTrackAdmin(resource.data.get('trackId', null)) &&
+                       isTrackAdmin(request.resource.data.get('trackId', null));
+      allow delete: if isTrackAdmin(resource.data.get('trackId', null));
+
+      // modules, topics, materials, quizzes, legacy sections/materials, meetings
+      match /{document=**} {
+        allow read: if isAnyAdmin() || hasActiveEnrollment(courseId);
+        allow write: if isTrackAdmin(courseTrack(courseId));
+      }
+    }
+
+    // ── Enrollments (created server-side by the Paystack webhook) ──
+    match /enrollments/{enrollmentId} {
+      allow get: if isAuth() &&
+                    (enrollmentId.matches(request.auth.uid + '_.*') || isAnyAdmin());
+      allow list: if isAuth() &&
+                     (resource.data.userId == request.auth.uid || isAnyAdmin());
+      allow create: if false;
+      // Students may only record their own learning progress.
+      allow update: if isAuth() && (
+        isAnyAdmin() ||
+        (resource.data.userId == request.auth.uid &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+           'progressPercent', 'completedMaterials', 'completedTopics',
+           'topicMaterialsCompleted', 'topicQuizzesPassed'
+         ]))
+      );
+      allow delete: if false;
+    }
+
+    // ── Payments: server only ─────────────────────────────────
+    match /payments/{paymentId} {
+      allow read, write: if false;
+    }
+
+    // ── Exams (legacy flow) ───────────────────────────────────
+    match /exams/{examId} {
+      allow read: if isAuth();
+      allow create: if isTrackAdmin(courseTrack(request.resource.data.courseId));
+      allow update, delete: if isTrackAdmin(courseTrack(resource.data.courseId));
+    }
+
+    // ── Attempts (legacy exams) and topic quiz attempts ───────
+    match /attempts/{attemptId} {
+      allow read: if isAuth() &&
+                     (resource.data.userId == request.auth.uid || isAnyAdmin());
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.status == 'in_progress';
+      allow update: if isAuth() && (
+        isAnyAdmin() ||
+        (resource.data.userId == request.auth.uid &&
+         resource.data.status == 'in_progress' &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+           'answers', 'status', 'submitTime', 'score', 'percentScore', 'passed'
+         ]))
+      );
+      allow delete: if false;
+    }
+
+    match /topicAttempts/{attemptId} {
+      allow read: if isAuth() &&
+                     (resource.data.userId == request.auth.uid || isAnyAdmin());
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.status == 'in_progress';
+      allow update: if isAuth() && (
+        isAnyAdmin() ||
+        (resource.data.userId == request.auth.uid &&
+         resource.data.status == 'in_progress' &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+           'answers', 'status', 'submitTime', 'score', 'percentScore', 'passed'
+         ]))
+      );
+      allow delete: if false;
+    }
+
+    // ── Announcements ─────────────────────────────────────────
+    match /announcements/{announcementId} {
+      allow read: if isAuth() && (resource.data.published == true || isAnyAdmin());
+      allow create: if isAnyAdmin() && (
+        isSuperAdmin() ||
+        (getUserRole() == 'admin_nclex' &&
+         request.resource.data.targetTrack in ['all', 'nclex']) ||
+        (getUserRole() == 'admin_ielts' &&
+         request.resource.data.targetTrack in ['all', 'ielts'])
+      );
+      // Track admins manage their own track's announcements and their own
+      // platform-wide ones.
+      allow update, delete: if isAnyAdmin() && (
+        isSuperAdmin() ||
+        resource.data.authorId == request.auth.uid ||
+        (getUserRole() == 'admin_nclex' && resource.data.get('targetTrack', 'all') == 'nclex') ||
+        (getUserRole() == 'admin_ielts' && resource.data.get('targetTrack', 'all') == 'ielts')
+      );
+    }
+
+    // ── Reviews ───────────────────────────────────────────────
+    match /reviews/{reviewId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuth() &&
+                       (resource.data.userId == request.auth.uid || isAnyAdmin());
+      allow update: if false;
+    }
+
+    // ── Credentialing (NCLEX only) ────────────────────────────
+    match /credentialingEnrollments/{userId} {
+      allow read: if isAuth() && (request.auth.uid == userId || isCredentialingAdmin());
+      allow write: if isCredentialingAdmin();
+    }
+
+    match /credentialingResources/{resourceId} {
+      allow read: if isAuth() && (
+        isCredentialingAdmin() ||
+        (exists(/databases/$(database)/documents/credentialingEnrollments/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/credentialingEnrollments/$(request.auth.uid)).data.status == 'active')
+      );
+      allow write: if isCredentialingAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if isAuth();
+      allow write: if settingId == 'credentialing' ? isCredentialingAdmin() : isSuperAdmin();
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

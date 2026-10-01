@@ -6,8 +6,18 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { cn } from "@/lib/utils/cn";
+import { getAdminTrack, isSuperAdminRole } from "@/types";
 
-const navItems = [
+type NavItem = {
+  id: string;
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+  // Who may see the item. Omitted = every admin role.
+  access?: "super" | "nclex-or-super";
+};
+
+const navItems: NavItem[] = [
   {
     id: "dashboard",
     label: "Dashboard",
@@ -76,6 +86,7 @@ const navItems = [
     id: "credentialing",
     label: "Credentialing",
     href: "/admin/credentialing",
+    access: "nclex-or-super",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -83,7 +94,19 @@ const navItems = [
       </svg>
     ),
   },
-  
+  {
+    id: "users",
+    label: "Users",
+    href: "/admin/users",
+    access: "super",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <path d="M9 12l2 2 4-4" />
+      </svg>
+    ),
+  },
 ];
 
 export default function AdminSidebar({
@@ -117,9 +140,26 @@ export default function AdminSidebar({
     router.push("/login");
   }
 
-  const filteredNav = navItems.filter((item) =>
+  const adminTrack = appUser ? getAdminTrack(appUser.role) : null;
+  const isSuperAdmin = isSuperAdminRole(appUser?.role);
+
+  const visibleNav = navItems.filter((item) => {
+    if (item.access === "super") return isSuperAdmin;
+    if (item.access === "nclex-or-super") {
+      return isSuperAdmin || adminTrack === "nclex";
+    }
+    return true;
+  });
+
+  const filteredNav = visibleNav.filter((item) =>
     item.label.toLowerCase().includes(search.toLowerCase())
   );
+
+  const roleBadge = adminTrack
+    ? adminTrack === "nclex"
+      ? { label: "NCLEX", cls: "bg-blue-50 text-blue-700", dot: "bg-blue-500" }
+      : { label: "IELTS", cls: "bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" }
+    : { label: "All Tracks", cls: "bg-violet-50 text-violet-700", dot: "bg-violet-500" };
 
   return (
     <aside
@@ -195,6 +235,19 @@ export default function AdminSidebar({
           </button>
         )}
       </div>
+
+      {/* ── Track badge ────────────────────────────────────── */}
+      {!collapsed && (
+        <div className="px-4 mb-3">
+          <span className={cn(
+            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+            roleBadge.cls
+          )}>
+            <span className={cn("w-1.5 h-1.5 rounded-full", roleBadge.dot)} />
+            {roleBadge.label}
+          </span>
+        </div>
+      )}
 
       {/* ── Search ─────────────────────────────────────────── */}
       {!collapsed && (
@@ -340,7 +393,7 @@ export default function AdminSidebar({
               <span className="inline-flex items-center gap-1 mt-2 px-2 py-0.5
                                bg-blue-50 text-blue-700 text-xs rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                Administrator
+                {adminTrack ? `${roleBadge.label} Administrator` : "Super Administrator"}
               </span>
             </div>
 

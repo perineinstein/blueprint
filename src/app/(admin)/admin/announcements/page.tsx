@@ -14,10 +14,30 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { Announcement } from "@/types";
+import { Announcement, getAdminTrack } from "@/types";
 
 export default function AnnouncementsPage() {
   const { appUser } = useAuth();
+  const adminTrack = appUser ? getAdminTrack(appUser.role) : null;
+  const trackOptions: { value: "all" | "nclex" | "ielts"; label: string }[] =
+    adminTrack === "nclex"
+      ? [
+          { value: "all", label: "All students" },
+          { value: "nclex", label: "NCLEX only" },
+        ]
+      : adminTrack === "ielts"
+      ? [
+          { value: "all", label: "All students" },
+          { value: "ielts", label: "IELTS only" },
+        ]
+      : [
+          { value: "all", label: "All students" },
+          { value: "nclex", label: "NCLEX only" },
+          { value: "ielts", label: "IELTS only" },
+        ];
+  const [targetTrack, setTargetTrack] = useState<"all" | "nclex" | "ielts">(
+    "all"
+  );
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
@@ -30,8 +50,19 @@ export default function AnnouncementsPage() {
     const snap = await getDocs(
       query(collection(db, "announcements"), orderBy("createdAt", "desc"))
     );
+    const all = snap.docs.map(
+      (d) => ({ id: d.id, ...d.data() } as Announcement)
+    );
+    // Track admins only see (and manage) announcements for their own track,
+    // plus platform-wide ones they posted themselves.
     setAnnouncements(
-      snap.docs.map((d) => ({ id: d.id, ...d.data() } as Announcement))
+      adminTrack
+        ? all.filter(
+            (a) =>
+              a.targetTrack === adminTrack ||
+              ((a.targetTrack ?? "all") === "all" && a.authorId === appUser?.id)
+          )
+        : all
     );
     setLoading(false);
   }
@@ -52,6 +83,7 @@ export default function AnnouncementsPage() {
       await addDoc(collection(db, "announcements"), {
         title,
         body,
+        targetTrack,
         courseId: null,
         authorId: appUser?.id,
         published: true,
@@ -136,6 +168,28 @@ export default function AnnouncementsPage() {
               placeholder="Write your announcement here..."
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Audience
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {trackOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setTargetTrack(opt.value)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium border
+                             transition-colors ${
+                               targetTrack === opt.value
+                                 ? "border-blue-500 bg-blue-50 text-blue-700"
+                                 : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                             }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <button
             type="submit"
             disabled={saving}
@@ -179,6 +233,11 @@ export default function AnnouncementsPage() {
                         }`}
                       >
                         {a.published ? "Published" : "Hidden"}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                        {(a.targetTrack ?? "all") === "all"
+                          ? "All"
+                          : a.targetTrack.toUpperCase()}
                       </span>
                     </div>
                     <p className="text-sm text-gray-500 line-clamp-2">{a.body}</p>

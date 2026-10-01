@@ -12,15 +12,23 @@ import {
   query,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
-import { Course } from "@/types";
+import { Course, getAdminTrack } from "@/types";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { formatPrice } from "@/lib/utils/formatting";
 
 export default function AdminCoursesPage() {
-  const [courses, setCourses] = useState<Course[]>([]);
+  const { appUser } = useAuth();
+  const adminTrack = appUser ? getAdminTrack(appUser.role) : null;
+  const [allCourses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+
+  // Track admins only see (and manage) courses in their own track.
+  const courses = adminTrack
+    ? allCourses.filter((c) => c.trackId === adminTrack)
+    : allCourses;
 
   async function fetchCourses() {
     const q = query(collection(db, "courses"), orderBy("createdAt", "desc"));

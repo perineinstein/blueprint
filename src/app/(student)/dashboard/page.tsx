@@ -74,7 +74,7 @@ export default function StudentDashboardPage() {
             collection(db, "announcements"),
             where("published", "==", true),
             orderBy("createdAt", "desc"),
-            limit(3)
+            limit(15)
           )
         ).catch(() => null);
 
@@ -141,10 +141,19 @@ export default function StudentDashboardPage() {
 
         const annSnap = await announcementsPromise;
         if (annSnap) {
+          // Platform-wide announcements plus those targeting a track the
+          // student is enrolled in. Older docs have no targetTrack = "all".
+          const studentTracks = new Set(
+            enrolledCourses.map((c) => c.trackId).filter(Boolean)
+          );
           setAnnouncements(
-            annSnap.docs.map(
-              (d) => ({ id: d.id, ...d.data() } as Announcement)
-            )
+            annSnap.docs
+              .map((d) => ({ id: d.id, ...d.data() } as Announcement))
+              .filter((a) => {
+                const target = a.targetTrack ?? "all";
+                return target === "all" || studentTracks.has(target);
+              })
+              .slice(0, 3)
           );
         }
       } catch (err) {

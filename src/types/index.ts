@@ -1,7 +1,35 @@
 import { Timestamp } from "firebase/firestore";
 
 // ─── Users ────────────────────────────────────────────────────
-export type UserRole = "student" | "admin";
+export type AdminRole = "super_admin" | "admin_nclex" | "admin_ielts" | "admin";
+export type UserRole = "student" | AdminRole;
+
+// "admin" is the legacy role and is treated as super_admin everywhere.
+export function isAdminRole(role: string | null | undefined): boolean {
+  return (
+    !!role &&
+    ["super_admin", "admin_nclex", "admin_ielts", "admin"].includes(role)
+  );
+}
+
+export function isSuperAdminRole(role: string | null | undefined): boolean {
+  return role === "super_admin" || role === "admin";
+}
+
+export function getAdminTrack(role: string | null | undefined): TrackId | null {
+  if (role === "admin_nclex") return "nclex";
+  if (role === "admin_ielts") return "ielts";
+  return null; // super_admin and admin see all tracks
+}
+
+export function canAccessTrack(
+  role: string | null | undefined,
+  trackId: TrackId
+): boolean {
+  const adminTrack = getAdminTrack(role);
+  if (adminTrack === null) return isAdminRole(role); // super admin sees all
+  return adminTrack === trackId;
+}
 
 
 export interface AppUser {
@@ -139,6 +167,7 @@ export interface Announcement {
   courseId: string | null;  // null = platform-wide
   authorId: string;
   published: boolean;
+  targetTrack: "all" | "nclex" | "ielts"; // missing on older docs — treat as "all"
   createdAt: Timestamp;
 }
 

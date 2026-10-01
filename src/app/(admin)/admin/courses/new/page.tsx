@@ -8,13 +8,16 @@ import { useRouter } from "next/navigation";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { TRACKS, TrackId } from "@/types";
+import { TRACKS, TrackId, getAdminTrack } from "@/types";
 
 
 export default function NewCoursePage() {
   const router = useRouter();
   const { appUser } = useAuth();
-  const [trackId, setTrackId] = useState<TrackId | null>(null);
+  // Track admins can only create courses in their own track.
+  const lockedTrack = appUser ? getAdminTrack(appUser.role) : null;
+  const [selectedTrackId, setTrackId] = useState<TrackId | null>(null);
+  const trackId: TrackId | null = lockedTrack ?? selectedTrackId;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -78,6 +81,7 @@ function handleThumbnailSelect(e: React.ChangeEvent<HTMLInputElement>) {
         published: false,
         thumbnail: thumbnailUrl, // empty string if no image uploaded
         totalDuration,
+        trackId,
         accessDurationDays: parseInt(accessDuration),
         instructorId: appUser?.id,
         createdAt: serverTimestamp(),
@@ -125,6 +129,16 @@ function handleThumbnailSelect(e: React.ChangeEvent<HTMLInputElement>) {
             />
           </div>
 
+          {lockedTrack ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Track
+              </label>
+              <p className="text-sm text-gray-900">
+                {TRACKS.find((t) => t.id === lockedTrack)?.name ?? lockedTrack}
+              </p>
+            </div>
+          ) : (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Track (optional)
@@ -162,6 +176,7 @@ function handleThumbnailSelect(e: React.ChangeEvent<HTMLInputElement>) {
               Assign to NCLEX or IELTS for the new learning structure
             </p>
           </div>
+          )}
 
           {/* Thumbnail upload */}
           <div>

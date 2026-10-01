@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { Course, getAdminTrack } from "@/types";
 
 interface Stats {
   totalCourses: number;
@@ -17,6 +19,8 @@ export default function AdminDashboardPage() {
     totalEnrollments: 0,
   });
   const [loading, setLoading] = useState(true);
+  const { appUser } = useAuth();
+  const adminTrack = appUser ? getAdminTrack(appUser.role) : null;
 
   useEffect(() => {
     async function fetchStats() {
@@ -27,11 +31,30 @@ export default function AdminDashboardPage() {
           getDocs(collection(db, "enrollments")),
         ]);
 
-        setStats({
-          totalCourses: coursesSnap.size,
-          totalStudents: studentsSnap.size,
-          totalEnrollments: enrollmentsSnap.size,
-        });
+        if (adminTrack) {
+          // Track admin: only count their own track's courses, enrollments,
+          // and the students enrolled in them.
+          const trackCourseIds = new Set(
+            coursesSnap.docs
+              .filter((c) => (c.data() as Course).trackId === adminTrack)
+              .map((c) => c.id)
+          );
+          const trackEnrollments = enrollmentsSnap.docs.filter((e) =>
+            trackCourseIds.has(e.data().courseId)
+          );
+          setStats({
+            totalCourses: trackCourseIds.size,
+            totalStudents: new Set(trackEnrollments.map((e) => e.data().userId))
+              .size,
+            totalEnrollments: trackEnrollments.length,
+          });
+        } else {
+          setStats({
+            totalCourses: coursesSnap.size,
+            totalStudents: studentsSnap.size,
+            totalEnrollments: enrollmentsSnap.size,
+          });
+        }
       } catch (error) {
         console.error("Error fetching stats:", error);
       } finally {
@@ -40,7 +63,7 @@ export default function AdminDashboardPage() {
     }
 
     fetchStats();
-  }, []);
+  }, [adminTrack]);
 
   const cards = [
     {

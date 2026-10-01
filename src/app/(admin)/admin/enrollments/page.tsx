@@ -10,7 +10,8 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
-import { Enrollment, Course, AppUser, Attempt } from "@/types";
+import { Enrollment, Course, AppUser, Attempt, TrackId, getAdminTrack } from "@/types";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { formatPrice } from "@/lib/utils/formatting";
 import Link from "next/link";
 
@@ -19,6 +20,7 @@ interface EnrollmentWithDetails extends Enrollment {
   studentEmail: string;
   courseTitle: string;
   coursePrice: number;
+  courseTrackId: TrackId | null;
   examAttempt?: {
     attemptId: string;
     examId: string;
@@ -28,7 +30,9 @@ interface EnrollmentWithDetails extends Enrollment {
 }
 
 export default function EnrollmentsPage() {
-  const [enrollments, setEnrollments] = useState<EnrollmentWithDetails[]>([]);
+  const { appUser } = useAuth();
+  const adminTrack = appUser ? getAdminTrack(appUser.role) : null;
+  const [allEnrollments, setEnrollments] = useState<EnrollmentWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "expired">("all");
@@ -102,6 +106,7 @@ export default function EnrollmentsPage() {
               studentEmail: user?.email ?? "—",
               courseTitle: course?.title ?? "Unknown course",
               coursePrice: course?.price ?? 0,
+              courseTrackId: course?.trackId ?? null,
               examAttempt,
             } as EnrollmentWithDetails;
           })
@@ -124,6 +129,12 @@ export default function EnrollmentsPage() {
 
     fetchEnrollments();
   }, []);
+
+  // Track admins only see enrollments for their own track's courses; stats
+  // below are derived from the same visible set.
+  const enrollments = adminTrack
+    ? allEnrollments.filter((e) => e.courseTrackId === adminTrack)
+    : allEnrollments;
 
   // Filter + search
   const filtered = enrollments.filter((e) => {

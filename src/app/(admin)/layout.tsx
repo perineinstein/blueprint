@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { Menu } from "lucide-react";
+import { isAdminRole } from "@/types";
 
 export default function AdminLayout({
   children,
@@ -22,7 +23,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (!loading && !appUser) router.push("/login");
-    if (!loading && appUser && appUser.role !== "admin") router.push("/dashboard");
+    if (!loading && appUser && !isAdminRole(appUser.role)) router.push("/dashboard");
   }, [appUser, loading, router]);
 
   if (loading) {
@@ -33,7 +34,7 @@ export default function AdminLayout({
     );
   }
 
-  if (!appUser || appUser.role !== "admin") return null;
+  if (!appUser || !isAdminRole(appUser.role)) return null;
 
   return (
     <div className="min-h-screen flex bg-gray-50">

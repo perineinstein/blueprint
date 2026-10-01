@@ -33,6 +33,7 @@ import {
   Banknote
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { getAdminTrack } from "@/types";
 import { formatPrice } from "@/lib/utils/formatting";
 import Link from "next/link";
 
@@ -79,6 +80,7 @@ const STATUS_CONFIG: Record<PhaseStatus, { icon: React.ReactNode; label: string;
 
 export default function AdminCredentialingPage() {
   const { appUser } = useAuth();
+  const adminTrack = appUser ? getAdminTrack(appUser.role) : null;
   const [enrollments, setEnrollments] = useState<EnrollmentWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -173,9 +175,10 @@ export default function AdminCredentialingPage() {
   }
 
   useEffect(() => {
+    if (adminTrack === "ielts") return; // no access — skip the reads
     fetchData();
     fetchPrice();
-  }, []);
+  }, [adminTrack]);
 
   function openEnrollment(enrollment: EnrollmentWithUser) {
     if (expandedId === enrollment.id) {
@@ -307,6 +310,17 @@ export default function AdminCredentialingPage() {
       e.userName.toLowerCase().includes(search.toLowerCase()) ||
       e.userEmail.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Credentialing is NCLEX-only; IELTS admins have no access.
+  if (adminTrack === "ielts") {
+    return (
+      <div className="text-center p-12">
+        <p className="text-gray-400 text-sm">
+          Credentialing is only available to NCLEX administrators.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>

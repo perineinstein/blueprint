@@ -8,7 +8,8 @@ import {
   getDocs
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/client";
-import { AppUser } from "@/types";
+import { AppUser, getAdminTrack } from "@/types";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 interface StudentWithStats extends AppUser {
   enrollmentCount: number;
@@ -16,6 +17,8 @@ interface StudentWithStats extends AppUser {
 }
 
 export default function StudentsPage() {
+  const { appUser } = useAuth();
+  const adminTrack = appUser ? getAdminTrack(appUser.role) : null;
   const [students, setStudents] = useState<StudentWithStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -31,6 +34,17 @@ export default function StudentsPage() {
           )
         );
 
+        // Track admins only see students enrolled in a course of their track
+        let trackCourseIds: Set<string> | null = null;
+        if (adminTrack) {
+          const coursesSnap = await getDocs(
+            query(collection(db, "courses"), where("trackId", "==", adminTrack))
+          );
+          trackCourseIds = new Set(
+            coursesSnap.docs.map((c) => c.id)
+          );
+        }
+
         // Get enrollments for each student
         const studentsWithStats = await Promise.all(
           studentsSnap.docs.map(async (d) => {
@@ -43,7 +57,9 @@ export default function StudentsPage() {
               )
             );
 
-            const enrollments = enrollmentsSnap.docs.map((e) => e.data());
+            const enrollments = enrollmentsSnap.docs
+              .map((e) => e.data())
+              .filter((e) => !trackCourseIds || trackCourseIds.has(e.courseId));
             const completedCount = enrollments.filter(
               (e) => e.progressPercent === 100
             ).length;
@@ -56,7 +72,11 @@ export default function StudentsPage() {
           })
         );
 
-        setStudents(studentsWithStats);
+        setStudents(
+          trackCourseIds
+            ? studentsWithStats.filter((s) => s.enrollmentCount > 0)
+            : studentsWithStats
+        );
       } catch (error) {
         console.error("Error fetching students:", error);
       } finally {
@@ -65,7 +85,7 @@ export default function StudentsPage() {
     }
 
     fetchStudents();
-  }, []);
+  }, [adminTrack]);
 
   const filtered = students.filter(
     (s) =>

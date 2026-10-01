@@ -91,7 +91,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const userDoc = await adminDb.collection("users").doc(uid).get();
-    if (userDoc.exists && userDoc.data()?.role === "admin") {
+    if (userDoc.exists && ["super_admin", "admin_nclex", "admin_ielts", "admin"].includes(
+        userDoc.data()?.role
+      )) {
       return NextResponse.json(
         { error: "Admin accounts cannot be deleted from here." },
         { status: 403 }

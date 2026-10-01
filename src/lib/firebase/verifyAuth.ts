@@ -5,6 +5,17 @@ export interface VerifiedUser {
   uid: string;
   email?: string;
   role?: string;
+  adminTrack?: "nclex" | "ielts" | null; // which track this admin manages
+}
+
+// Kept inline (not imported from @/types) so server code does not pull in a
+// client-side module. Keep in sync with the helpers in src/types/index.ts.
+const ADMIN_ROLES = ["super_admin", "admin_nclex", "admin_ielts", "admin"];
+
+function getAdminTrack(role: string): "nclex" | "ielts" | null {
+  if (role === "admin_nclex") return "nclex";
+  if (role === "admin_ielts") return "ielts";
+  return null;
 }
 
 async function verifyFirebaseToken(idToken: string): Promise<{ uid: string; email?: string } | null> {
@@ -59,8 +70,11 @@ export async function verifyAdminToken(
 
   try {
     const userDoc = await adminDb.collection("users").doc(user.uid).get();
-    if (!userDoc.exists || userDoc.data()?.role !== "admin") return null;
-    return { ...user, role: "admin" };
+    const role = userDoc.data()?.role;
+    if (!userDoc.exists || typeof role !== "string" || !ADMIN_ROLES.includes(role)) {
+      return null;
+    }
+    return { ...user, role, adminTrack: getAdminTrack(role) };
   } catch {
     return null;
   }
